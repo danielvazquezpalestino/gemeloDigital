@@ -1,8 +1,8 @@
 {
-  "name": "node",
+  "name": "gemelo-digital",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST del Gemelo Digital",
+  "main": "dist/app.js",
   "scripts": {
     "dev": "tsnd --respawn --clear src/app.ts",
     "build": "rimraf ./dist && tsc",
