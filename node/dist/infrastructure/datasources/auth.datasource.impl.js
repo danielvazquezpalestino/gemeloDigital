@@ -8,8 +8,7 @@ class AuthDatasourceImpl {
     async register(registerUserDto) {
         const { id, name, email, password } = registerUserDto;
         try {
-            const user = new User(id, name, email, password, ['USER']);
-            return user;
+            return new User(id, name, email, password, ['ADMIN_ROLE']);
         }
         catch (error) {
             if (error instanceof Error) {
