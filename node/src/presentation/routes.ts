@@ -1,5 +1,6 @@
 import express = require('express');
 import AuthRoutes = require('./auth/routes');
+import RutasUbicaciones = require('./ubicaciones/rutas');
 
 
 class AppRoutes 
@@ -9,6 +10,7 @@ class AppRoutes
      const router = express.Router();
 
         router.use('/api/Auth', AuthRoutes.routes);
+        router.use('/api/ubicaciones', RutasUbicaciones.routes);
 
 
     return router;
