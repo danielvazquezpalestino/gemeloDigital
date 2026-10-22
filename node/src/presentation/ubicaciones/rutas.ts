@@ -1,7 +1,7 @@
 import express = require('express');
 import ControladorUbicaciones = require('./controlador');
-import RepositorioUbicacionesImpl = require('../../infrastructure/repositorios/repositorio-ubicaciones.impl');
-import FuenteDatosUbicacionesImpl = require('../../infrastructure/fuentes-datos/fuente-datos-ubicaciones.impl');
+import RepositorioUbicacionesImpl = require('../../infrastructure/repositories/repositorio-ubicaciones.impl');
+import FuenteDatosUbicacionesImpl = require('../../infrastructure/datasources/fuente-datos-ubicaciones.impl');
 
 class RutasUbicaciones {
     static get routes(): express.Router {

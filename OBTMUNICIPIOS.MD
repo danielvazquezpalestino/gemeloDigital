@@ -81,16 +81,16 @@ GET /api/ubicaciones/municipios
    │             └─▶ presentation/ubicaciones/controlador.ts
    │                    ControladorUbicaciones.obtenerMunicipios
    │                          ▼
-   │                  domain/repositorios/repositorio-ubicaciones.ts
+   │                  domain/repositories/repositorio-ubicaciones.ts
    │                    RepositorioUbicaciones                    (puerto, abstracto)
    │                          ▼
-   │                  infrastructure/repositorios/repositorio-ubicaciones.impl.ts
+   │                  infrastructure/repositories/repositorio-ubicaciones.impl.ts
    │                    RepositorioUbicacionesImpl
    │                          ▼
-   │                  domain/fuentes-datos/fuente-datos-ubicaciones.ts
+   │                  domain/datasources/fuente-datos-ubicaciones.ts
    │                    FuenteDatosUbicaciones                     (puerto, abstracto)
    │                          ▼
-   │                  infrastructure/fuentes-datos/fuente-datos-ubicaciones.impl.ts
+   │                  infrastructure/datasources/fuente-datos-ubicaciones.impl.ts
    │                    FuenteDatosUbicacionesImpl
    │                          ▼  SELECT id, nombre, region FROM municipios ORDER BY nombre ASC
    │                  config/database.ts      pool de conexiones MySQL
@@ -100,11 +100,11 @@ GET /api/ubicaciones/municipios
 
 | Capa | Archivo | Símbolo |
 |---|---|---|
-| Dominio (entidad) | `node/src/domain/entidades/municipio.entidad.ts` | `Municipio` |
-| Dominio (puerto repositorio) | `node/src/domain/repositorios/repositorio-ubicaciones.ts` | `RepositorioUbicaciones` |
-| Dominio (puerto fuente de datos) | `node/src/domain/fuentes-datos/fuente-datos-ubicaciones.ts` | `FuenteDatosUbicaciones` |
-| Infraestructura (fuente de datos) | `node/src/infrastructure/fuentes-datos/fuente-datos-ubicaciones.impl.ts` | `FuenteDatosUbicacionesImpl` |
-| Infraestructura (repositorio) | `node/src/infrastructure/repositorios/repositorio-ubicaciones.impl.ts` | `RepositorioUbicacionesImpl` |
+| Dominio (entidad) | `node/src/domain/entities/municipio.entidad.ts` | `Municipio` |
+| Dominio (puerto repositorio) | `node/src/domain/repositories/repositorio-ubicaciones.ts` | `RepositorioUbicaciones` |
+| Dominio (puerto fuente de datos) | `node/src/domain/datasources/fuente-datos-ubicaciones.ts` | `FuenteDatosUbicaciones` |
+| Infraestructura (fuente de datos) | `node/src/infrastructure/datasources/fuente-datos-ubicaciones.impl.ts` | `FuenteDatosUbicacionesImpl` |
+| Infraestructura (repositorio) | `node/src/infrastructure/repositories/repositorio-ubicaciones.impl.ts` | `RepositorioUbicacionesImpl` |
 | Presentación (controlador) | `node/src/presentation/ubicaciones/controlador.ts` | `ControladorUbicaciones` |
 | Presentación (rutas del módulo) | `node/src/presentation/ubicaciones/rutas.ts` | `RutasUbicaciones` |
 | Presentación (rutas raíz) | `node/src/presentation/rutas.ts` | `AppRoutes` (monta `/api/ubicaciones`) |

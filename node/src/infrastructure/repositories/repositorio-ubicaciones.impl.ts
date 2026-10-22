@@ -1,6 +1,6 @@
-import Municipio = require('../../domain/entidades/municipio.entidad');
-import FuenteDatosUbicaciones = require('../../domain/fuentes-datos/fuente-datos-ubicaciones');
-import RepositorioUbicaciones = require('../../domain/repositorios/repositorio-ubicaciones');
+import Municipio = require('../../domain/entities/municipio.entidad');
+import FuenteDatosUbicaciones = require('../../domain/datasources/fuente-datos-ubicaciones');
+import RepositorioUbicaciones = require('../../domain/repositories/repositorio-ubicaciones');
 
 class RepositorioUbicacionesImpl implements RepositorioUbicaciones {
     constructor(private readonly fuenteDatos: FuenteDatosUbicaciones) {}

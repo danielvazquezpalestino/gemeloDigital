@@ -1,4 +1,4 @@
-import Municipio = require('../entidades/municipio.entidad');
+import Municipio = require('../entities/municipio.entidad');
 
 abstract class RepositorioUbicaciones {
     abstract obtenerMunicipios(): Promise<Municipio[]>;

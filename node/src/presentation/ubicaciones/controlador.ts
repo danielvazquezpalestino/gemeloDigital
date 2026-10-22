@@ -1,5 +1,5 @@
 import express = require('express');
-import RepositorioUbicaciones = require('../../domain/repositorios/repositorio-ubicaciones');
+import RepositorioUbicaciones = require('../../domain/repositories/repositorio-ubicaciones');
 
 class ControladorUbicaciones {
     constructor(

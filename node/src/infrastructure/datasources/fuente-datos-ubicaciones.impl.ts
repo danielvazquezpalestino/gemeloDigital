@@ -1,7 +1,7 @@
 import mysql = require('mysql2/promise');
 import pool = require('../../config/database');
-import Municipio = require('../../domain/entidades/municipio.entidad');
-import FuenteDatosUbicaciones = require('../../domain/fuentes-datos/fuente-datos-ubicaciones');
+import Municipio = require('../../domain/entities/municipio.entidad');
+import FuenteDatosUbicaciones = require('../../domain/datasources/fuente-datos-ubicaciones');
 import CustomError = require('../../domain/datasources/errors/custom.error');
 
 class FuenteDatosUbicacionesImpl extends FuenteDatosUbicaciones {
