@@ -1,5 +1,5 @@
-import ResultadoCalculoSolar = require('../entidades/resultado-calculo-solar.entidad');
-import TipoTarifa = require('../entidades/tipo-tarifa');
+import ResultadoCalculoSolar = require('../entities/resultado-calculo-solar.entidad');
+import TipoTarifa = require('../entities/tipo-tarifa');
 
 /**
  * Modelo de cálculo solar.

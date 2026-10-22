@@ -1,8 +1,8 @@
 import express = require('express');
 import CalculadoraSimulacionSolar = require('../../domain/servicios/calculadora-simulacion-solar');
 import ControladorSimulaciones = require('./controlador');
-import FuenteDatosSimulacionesImpl = require('../../infrastructure/fuentes-datos/fuente-datos-simulaciones.impl');
-import RepositorioSimulacionesImpl = require('../../infrastructure/repositorios/repositorio-simulaciones.impl');
+import FuenteDatosSimulacionesImpl = require('../../infrastructure/datasources/fuente-datos-simulaciones.impl');
+import RepositorioSimulacionesImpl = require('../../infrastructure/repositories/repositorio-simulaciones.impl');
 
 /**
  * Rutas del módulo de simulaciones solares.

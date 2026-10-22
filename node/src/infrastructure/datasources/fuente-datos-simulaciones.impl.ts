@@ -1,8 +1,8 @@
 import mysql = require('mysql2/promise');
-import ErrorPersonalizado = require('../../domain/fuentes-datos/errores/error-personalizado');
-import FuenteDatosSimulaciones = require('../../domain/fuentes-datos/fuente-datos-simulaciones');
-import Simulacion = require('../../domain/entidades/simulacion.entidad');
-import TipoTarifa = require('../../domain/entidades/tipo-tarifa');
+import ErrorPersonalizado = require('../../domain/datasources/errors/custom-error');
+import FuenteDatosSimulaciones = require('../../domain/datasources/fuente-datos-simulaciones');
+import Simulacion = require('../../domain/entities/simulacion.entidad');
+import TipoTarifa = require('../../domain/entities/tipo-tarifa');
 import pool = require('../../config/database');
 
 /**

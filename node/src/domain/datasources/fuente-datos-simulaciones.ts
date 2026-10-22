@@ -1,8 +1,8 @@
-import Simulacion = require('../entidades/simulacion.entidad');
+import Simulacion = require('../entities/simulacion.entidad');
 
 /**
  * Puerto (contrato) de persistencia del módulo de simulaciones.
- * La implementación concreta vive en `infrastructure/fuentes-datos` y es la
+ * La implementación concreta vive en `infrastructure/datasources` y es la
  * única capa donde se escribe SQL.
  */
 abstract class FuenteDatosSimulaciones

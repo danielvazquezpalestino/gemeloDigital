@@ -1,12 +1,12 @@
 import CalculadoraSimulacionSolar = require('../../domain/servicios/calculadora-simulacion-solar');
-import DtoConsultarSimulaciones = require('../../domain/entidades/dtos/simulaciones/consultar-simulaciones.dto');
-import DtoCrearSimulacion = require('../../domain/entidades/dtos/simulaciones/crear-simulacion.dto');
-import DtoRecalcularSimulacion = require('../../domain/entidades/dtos/simulaciones/recalcular-simulacion.dto');
-import ErrorPersonalizado = require('../../domain/fuentes-datos/errores/error-personalizado');
-import FuenteDatosSimulaciones = require('../../domain/fuentes-datos/fuente-datos-simulaciones');
-import HistorialSimulaciones = require('../../domain/entidades/historial-simulaciones.entidad');
-import RepositorioSimulaciones = require('../../domain/repositorios/repositorio-simulaciones');
-import Simulacion = require('../../domain/entidades/simulacion.entidad');
+import DtoConsultarSimulaciones = require('../../domain/entities/dtos/simulaciones/consultar-simulaciones.dto');
+import DtoCrearSimulacion = require('../../domain/entities/dtos/simulaciones/crear-simulacion.dto');
+import DtoRecalcularSimulacion = require('../../domain/entities/dtos/simulaciones/recalcular-simulacion.dto');
+import ErrorPersonalizado = require('../../domain/datasources/errors/custom-error');
+import FuenteDatosSimulaciones = require('../../domain/datasources/fuente-datos-simulaciones');
+import HistorialSimulaciones = require('../../domain/entities/historial-simulaciones.entidad');
+import RepositorioSimulaciones = require('../../domain/repositories/repositorio-simulaciones');
+import Simulacion = require('../../domain/entities/simulacion.entidad');
 
 /**
  * Implementación de los casos de uso de simulaciones.

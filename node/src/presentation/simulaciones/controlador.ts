@@ -1,10 +1,10 @@
 import express = require('express');
-import DtoConsultarSimulaciones = require('../../domain/entidades/dtos/simulaciones/consultar-simulaciones.dto');
-import DtoCrearSimulacion = require('../../domain/entidades/dtos/simulaciones/crear-simulacion.dto');
-import DtoIdSimulacion = require('../../domain/entidades/dtos/simulaciones/id-simulacion.dto');
-import DtoRecalcularSimulacion = require('../../domain/entidades/dtos/simulaciones/recalcular-simulacion.dto');
-import ErrorPersonalizado = require('../../domain/fuentes-datos/errores/error-personalizado');
-import RepositorioSimulaciones = require('../../domain/repositorios/repositorio-simulaciones');
+import DtoConsultarSimulaciones = require('../../domain/entities/dtos/simulaciones/consultar-simulaciones.dto');
+import DtoCrearSimulacion = require('../../domain/entities/dtos/simulaciones/crear-simulacion.dto');
+import DtoIdSimulacion = require('../../domain/entities/dtos/simulaciones/id-simulacion.dto');
+import DtoRecalcularSimulacion = require('../../domain/entities/dtos/simulaciones/recalcular-simulacion.dto');
+import ErrorPersonalizado = require('../../domain/datasources/errors/custom-error');
+import RepositorioSimulaciones = require('../../domain/repositories/repositorio-simulaciones');
 
 /**
  * Manejo HTTP del módulo de simulaciones solares.
