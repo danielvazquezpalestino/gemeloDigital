@@ -95,6 +95,22 @@ test('los endpoints v1 responden con datos de demostración', async () =>
         assert.equal(paneles.cuerpo.esDemostracion, true);
         assert.equal(paneles.cuerpo.paneles.length, 3);
 
+        const panelesFabricante = await solicitar(base, '/panels?fabricante=Demo%20Uno');
+        assert.equal(panelesFabricante.estado, 200);
+        assert.equal(panelesFabricante.cuerpo.paneles.length, 2);
+
+        const panelesPotencia = await solicitar(base, '/panels?potenciaMinimaWatts=500');
+        assert.equal(panelesPotencia.estado, 200);
+        assert.equal(panelesPotencia.cuerpo.paneles.length, 1);
+
+        const panelesSinCoincidencias = await solicitar(base, '/panels?fabricante=NoExiste');
+        assert.equal(panelesSinCoincidencias.estado, 200);
+        assert.equal(panelesSinCoincidencias.cuerpo.paneles.length, 0);
+
+        const panelesInvalidos = await solicitar(base, '/panels?potenciaMinimaWatts=abc');
+        assert.equal(panelesInvalidos.estado, 400);
+        assert.equal(typeof panelesInvalidos.cuerpo.mensaje, 'string');
+
         const financiero = await solicitar(base, '/financial/estimate', 'POST', {
             inversionInicial: 100000,
             ahorroAnual: 30000,

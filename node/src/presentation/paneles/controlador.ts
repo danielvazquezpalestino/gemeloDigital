@@ -1,4 +1,5 @@
 import express = require('express');
+import CustomError = require('../../domain/datasources/errors/custom.error');
 import DtoFiltrarPaneles = require('../../domain/entities/dtos/paneles/filtrar-paneles.dto');
 import RepositorioPaneles = require('../../domain/repositories/repositorio-paneles');
 import RespondedorErrores = require('../comun/respondedor-errores');
@@ -15,7 +16,11 @@ class ControladorPaneles
 
         if (error || !dto)
         {
-            return respuesta.status(400).json({ mensaje: error ?? 'Los parámetros de consulta son inválidos' });
+            return RespondedorErrores.responder(
+                CustomError.badRequest(error ?? 'Los parámetros de consulta son inválidos'),
+                respuesta,
+                'No se pudieron obtener los paneles',
+            );
         }
 
         try
