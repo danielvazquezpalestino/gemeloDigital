@@ -1,5 +1,6 @@
 import express = require('express');
 import AuthRoutes = require('./auth/routes');
+import RutasFinanciero = require('./financiero/rutas');
 
 
 class AppRoutes 
@@ -9,6 +10,7 @@ class AppRoutes
      const router = express.Router();
 
         router.use('/api/Auth', AuthRoutes.routes);
+        router.use('/api/financiero', RutasFinanciero.routes);
 
 
     return router;
