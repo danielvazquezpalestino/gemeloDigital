@@ -1,4 +1,5 @@
 import express = require('express');
+import CustomError = require('../../domain/datasources/errors/custom.error');
 import DtoEstimarFactura = require('../../domain/entities/dtos/electricidad/estimar-factura.dto');
 import DtoRiesgoDac = require('../../domain/entities/dtos/electricidad/riesgo-dac.dto');
 import RepositorioElectricidad = require('../../domain/repositories/repositorio-electricidad');
@@ -15,11 +16,14 @@ class ControladorElectricidad
         try
         {
             const tarifas = await this.repositorioElectricidad.listarTarifas();
+            const esDemostracion = tarifas.some((tarifa) => tarifa.esDemostracion);
 
             return respuesta.status(200).json({
                 mensaje: 'Tarifas obtenidas correctamente',
-                esDemostracion: true,
-                advertencia: 'El catálogo contiene datos de DEMOSTRACIÓN. No son tarifas oficiales de la CFE.',
+                esDemostracion,
+                advertencia: esDemostracion
+                    ? 'El catálogo contiene datos de DEMOSTRACIÓN. No son tarifas oficiales de la CFE.'
+                    : null,
                 tarifas,
             });
         }
@@ -35,7 +39,11 @@ class ControladorElectricidad
 
         if (error || !dto)
         {
-            return respuesta.status(400).json({ mensaje: error ?? 'Los datos de la estimación son inválidos' });
+            return RespondedorErrores.responder(
+                CustomError.badRequest(error ?? 'Los datos de la estimación son inválidos'),
+                respuesta,
+                'No se pudo calcular la estimación de la factura',
+            );
         }
 
         try
@@ -59,7 +67,11 @@ class ControladorElectricidad
 
         if (error || !dto)
         {
-            return respuesta.status(400).json({ mensaje: error ?? 'Los parámetros de evaluación son inválidos' });
+            return RespondedorErrores.responder(
+                CustomError.badRequest(error ?? 'Los parámetros de evaluación son inválidos'),
+                respuesta,
+                'No se pudo evaluar el riesgo DAC',
+            );
         }
 
         try

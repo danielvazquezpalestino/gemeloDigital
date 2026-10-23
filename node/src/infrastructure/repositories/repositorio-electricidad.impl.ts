@@ -26,19 +26,23 @@ class RepositorioElectricidadImpl implements RepositorioElectricidad
 
     async estimarFactura(dto: DtoEstimarFactura): Promise<FacturaEstimada>
     {
-        const tarifa = await this.fuenteDatos.buscarTarifa(dto.tarifa);
+        const tarifa = await this.fuenteDatos.buscarTarifa(dto.tipoTarifa);
 
         if (!tarifa)
         {
-            throw CustomError.notFound(`La tarifa "${dto.tarifa}" no existe en el catálogo configurado`);
+            throw CustomError.notFound(`La tarifa "${dto.tipoTarifa}" no existe en el catálogo configurado`);
         }
 
-        return this.calculadoraFactura.calcular(tarifa, dto.consumoKwh);
+        return this.calculadoraFactura.calcular(tarifa, dto.consumoKwh, dto.periodo);
     }
 
     async evaluarRiesgoDac(dto: DtoRiesgoDac): Promise<EvaluacionRiesgoDac>
     {
-        return this.evaluadorRiesgo.evaluar(dto.consumoPromedioMensualKwh, dto.mesesHistoricos);
+        return this.evaluadorRiesgo.evaluar(
+            dto.consumoPromedioMensualKwh,
+            dto.mesesHistoricos,
+            dto.tipoTarifa,
+        );
     }
 }
 

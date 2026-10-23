@@ -1,3 +1,5 @@
+import TipoTarifa = require('./tipo-tarifa');
+
 /**
  * Evalúa el nivel de riesgo de caer en la tarifa DAC.
  *
@@ -8,6 +10,7 @@ class EvaluacionRiesgoDac
 {
     constructor(
         public readonly nivelRiesgo: string,
+        public readonly tipoTarifa: TipoTarifa,
         public readonly puedeDeterminarse: boolean,
         public readonly motivo: string,
         public readonly consumoPromedioMensualKwh: number,

@@ -1,5 +1,6 @@
 import FacturaEstimada = require('../entities/factura-estimada.entidad');
 import LineaFacturaEstimada = require('../entities/linea-factura-estimada.entidad');
+import PeriodoFacturacion = require('../entities/periodo-facturacion');
 import TarifaElectrica = require('../entities/tarifa-electrica.entidad');
 
 /**
@@ -10,7 +11,11 @@ import TarifaElectrica = require('../entities/tarifa-electrica.entidad');
  */
 class CalculadoraFacturaElectrica
 {
-    calcular(tarifa: TarifaElectrica, consumoKwh: number): FacturaEstimada
+    calcular(
+        tarifa: TarifaElectrica,
+        consumoKwh: number,
+        periodo: PeriodoFacturacion = PeriodoFacturacion.MENSUAL,
+    ): FacturaEstimada
     {
         const desglose: LineaFacturaEstimada[] = [];
         let restante = consumoKwh;
@@ -53,6 +58,7 @@ class CalculadoraFacturaElectrica
             tarifa.codigo,
             tarifa.nombre,
             CalculadoraFacturaElectrica.redondear(consumoKwh),
+            periodo,
             'MXN',
             desglose,
             totalEstimado,

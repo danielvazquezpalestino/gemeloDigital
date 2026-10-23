@@ -1,4 +1,5 @@
 import EvaluacionRiesgoDac = require('../entities/riesgo-dac.entidad');
+import TipoTarifa = require('../entities/tipo-tarifa');
 
 /**
  * Evaluador de riesgo DAC basado en una regla de DEMOSTRACIÓN.
@@ -12,17 +13,29 @@ class EvaluadorRiesgoDac
     static readonly UMBRAL_DEMO_KWH_MENSUAL = 2500;
     static readonly MESES_MINIMOS_DEMO = 6;
 
-    evaluar(consumoPromedioMensualKwh: number, mesesHistoricos: number): EvaluacionRiesgoDac
+    evaluar(
+        consumoPromedioMensualKwh: number,
+        mesesHistoricos: number,
+        tipoTarifa: TipoTarifa,
+    ): EvaluacionRiesgoDac
     {
         const advertencias = [
             'La regla aplicada es una DEMOSTRACIÓN y no un criterio oficial de la CFE.',
             'El resultado no constituye una determinación oficial de cambio de tarifa.',
         ];
 
+        if (tipoTarifa === TipoTarifa.DAC)
+        {
+            advertencias.push(
+                'El consumo ya corresponde a la tarifa DAC; el nivel de riesgo se muestra solo como referencia.',
+            );
+        }
+
         if (mesesHistoricos < EvaluadorRiesgoDac.MESES_MINIMOS_DEMO)
         {
             return new EvaluacionRiesgoDac(
                 'INDETERMINADO',
+                tipoTarifa,
                 false,
                 `Se requieren al menos ${EvaluadorRiesgoDac.MESES_MINIMOS_DEMO} meses de historial para aplicar la regla de demostración.`,
                 EvaluadorRiesgoDac.redondear(consumoPromedioMensualKwh),
@@ -52,6 +65,7 @@ class EvaluadorRiesgoDac
 
         return new EvaluacionRiesgoDac(
             nivelRiesgo,
+            tipoTarifa,
             true,
             motivo,
             EvaluadorRiesgoDac.redondear(consumoPromedioMensualKwh),

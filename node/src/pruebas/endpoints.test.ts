@@ -11,6 +11,7 @@ process.env['DB_USER'] ??= 'root';
 process.env['DB_NAME'] ??= 'gemeloDigital';
 
 const RutasAplicacion: { routes: express.Router } = require('../presentation/routes');
+const pool: { end: () => Promise<void> } = require('../config/database');
 
 interface RespuestaPrueba
 {
@@ -36,7 +37,7 @@ async function solicitar(base: string, ruta: string, metodo = 'GET', cuerpo?: un
     };
 }
 
-test('los siete endpoints responden con datos de demostración', async () =>
+test('los endpoints v1 responden con datos de demostración', async () =>
 {
     const aplicacion = express();
     aplicacion.use(express.json());
@@ -57,18 +58,37 @@ test('los siete endpoints responden con datos de demostración', async () =>
         assert.equal(tarifas.cuerpo.tarifas.length, 3);
 
         const factura = await solicitar(base, '/electricity/estimate-bill', 'POST', {
-            tarifa: 'PDBT',
+            tipoTarifa: 'PDBT',
             consumoKwh: 150,
+            periodo: 'BIMESTRAL',
         });
         assert.equal(factura.estado, 200);
         assert.equal(factura.cuerpo.factura.moneda, 'MXN');
+        assert.equal(factura.cuerpo.factura.periodo, 'BIMESTRAL');
         assert.ok(factura.cuerpo.factura.totalEstimado > 0);
         assert.equal(factura.cuerpo.factura.esDemostracion, true);
 
-        const riesgo = await solicitar(base, '/electricity/dac-risk?consumoPromedioMensualKwh=3000&mesesHistoricos=12');
+        const facturaInvalida = await solicitar(base, '/electricity/estimate-bill', 'POST', {
+            consumoKwh: 150,
+        });
+        assert.equal(facturaInvalida.estado, 400);
+        assert.equal(typeof facturaInvalida.cuerpo.mensaje, 'string');
+
+        const riesgo = await solicitar(
+            base,
+            '/electricity/dac-risk?consumoPromedioMensualKwh=3000&tipoTarifa=PDBT&mesesHistoricos=12',
+        );
         assert.equal(riesgo.estado, 200);
         assert.equal(riesgo.cuerpo.evaluacion.nivelRiesgo, 'ALTO');
+        assert.equal(riesgo.cuerpo.evaluacion.tipoTarifa, 'PDBT');
         assert.equal(riesgo.cuerpo.evaluacion.determinacionOficial, false);
+
+        const riesgoInvalido = await solicitar(
+            base,
+            '/electricity/dac-risk?consumoPromedioMensualKwh=3000',
+        );
+        assert.equal(riesgoInvalido.estado, 400);
+        assert.equal(typeof riesgoInvalido.cuerpo.mensaje, 'string');
 
         const paneles = await solicitar(base, '/panels');
         assert.equal(paneles.estado, 200);
@@ -118,5 +138,7 @@ test('los siete endpoints responden con datos de demostración', async () =>
         {
             servidor.close((error) => error ? rechazar(error) : resolver());
         });
+
+        await pool.end();
     }
 });
