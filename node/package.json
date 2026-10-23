@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsnd --respawn --clear src/app.ts",
     "build": "rimraf ./dist && tsc",
-    "start": "npm run build && node dist/app.js"
+    "start": "npm run build && node dist/app.js",
+    "test": "npm run build && node --test dist/pruebas/calculadora-financiera.test.js dist/pruebas/endpoints.test.js"
   },
   "keywords": [],
   "author": "",
