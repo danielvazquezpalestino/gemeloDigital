@@ -13,6 +13,8 @@ abstract class FuenteDatosSimulaciones
 
     abstract listar(municipioId: number | null, limite: number, desplazamiento: number): Promise<Simulacion[]>;
 
+    abstract listarTodos(municipioId: number | null): Promise<Simulacion[]>;
+
     abstract contar(municipioId: number | null): Promise<number>;
 
     abstract actualizar(simulacion: Simulacion): Promise<Simulacion>;

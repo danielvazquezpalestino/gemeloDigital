@@ -102,6 +102,25 @@ class FuenteDatosSimulacionesImpl implements FuenteDatosSimulaciones
         }
     }
 
+    async listarTodos(municipioId: number | null): Promise<Simulacion[]>
+    {
+        try
+        {
+            const condiciones = municipioId === null ? '' : 'WHERE municipio_id = ?';
+            const [filas] = await pool.execute<mysql.RowDataPacket[]>
+            (
+                `SELECT ${FuenteDatosSimulacionesImpl.COLUMNAS} FROM simulaciones ${condiciones}`,
+                municipioId === null ? [] : [municipioId],
+            );
+
+            return filas.map((fila) => FuenteDatosSimulacionesImpl.mapearFila(fila));
+        }
+        catch (error)
+        {
+            throw this.traducirError(error, 'No se pudo obtener el historial de simulaciones');
+        }
+    }
+
     async contar(municipioId: number | null): Promise<number>
     {
         try
