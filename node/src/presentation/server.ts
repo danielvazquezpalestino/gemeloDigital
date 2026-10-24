@@ -1,4 +1,6 @@
 import express = require("express");
+import swaggerUi = require('swagger-ui-express');
+import Swagger = require('./swagger');
 
 interface Options
 {
@@ -11,12 +13,14 @@ class Server
     public readonly app = express();
     private readonly port: number;
     private readonly routes: express.Router;
+    private readonly swagger: Swagger;
 
     constructor (option: Options)
     {
         const { port = 3100 , routes } = option;
         this.port = port;
         this.routes = routes;
+        this.swagger = new Swagger();
     } 
 async start ()
 {
@@ -27,6 +31,9 @@ async start ()
 
 
     this.app.use(this.routes);
+
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(this.swagger.documento));
+
     this.app.listen(this.port , () =>
     {
         console.log(`Server started on port ${this.port}`);
@@ -35,4 +42,3 @@ async start ()
 }
 
 export = Server;
-

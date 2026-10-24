@@ -1,6 +1,7 @@
 import Server = require('./presentation/server');
 import envs = require('./config/envs.ts/');
 import AppRoutes = require('./presentation/routes');
+import Swagger = require('./presentation/swagger');
 import Database = require('./infrastructure/database');
 
 (() =>
