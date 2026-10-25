@@ -3,6 +3,7 @@ import AuthRoutes = require('./auth/routes');
 import RutasV1 = require('./rutas-v1');
 import RutasClima = require('./clima/rutas');
 import RutasAnalytics = require('./analytics/rutas');
+import RutasFinanciero = require('./financiero/rutas');
 
 
 class AppRoutes 
@@ -14,6 +15,7 @@ class AppRoutes
         router.use('/api/Auth', AuthRoutes.routes);
         router.use('/api/v1/weather', RutasClima.routes);
         router.use('/api/v1/analytics', RutasAnalytics.routes);
+        router.use('/api/financiero', RutasFinanciero.routes);
         router.use('/api/v1', RutasV1.routes);
 
     return router;
