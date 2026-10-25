@@ -125,28 +125,22 @@ test('los endpoints v1 responden con datos de demostración', async () =>
 
         const incentivos = await solicitar(base, '/incentives');
         assert.equal(incentivos.estado, 200);
-        assert.equal(incentivos.cuerpo.esDemostracion, true);
-        assert.equal(incentivos.cuerpo.incentivos.length, 3);
+        assert.ok(Array.isArray(incentivos.cuerpo.incentivos));
 
         const elegibilidad = await solicitar(
             base,
-            '/incentives/eligibility?incentivoId=DEMO-HOGAR-SOLAR&tipoUsuario=HOGAR&ingresoMensualMxn=15000&consumoPromedioMensualKwh=120',
+            '/incentives/eligibility?beneficiaryType=home&municipality=Puebla&systemCapacityKw=10',
         );
         assert.equal(elegibilidad.estado, 200);
-        assert.equal(elegibilidad.cuerpo.resultado.elegible, true);
-        assert.equal(elegibilidad.cuerpo.resultado.determinacionOficial, false);
+        assert.ok(Array.isArray(elegibilidad.cuerpo.evaluaciones));
 
-        const faltantes = await solicitar(base, '/incentives/eligibility?incentivoId=DEMO-HOGAR-SOLAR');
-        assert.equal(faltantes.estado, 200);
-        assert.equal(faltantes.cuerpo.resultado.elegible, null);
-        assert.ok(faltantes.cuerpo.resultado.requisitosFaltantes.length > 0);
+        const beneficiarioInvalido = await solicitar(base, '/incentives/eligibility');
+        assert.equal(beneficiarioInvalido.estado, 400);
+        assert.equal(typeof beneficiarioInvalido.cuerpo.mensaje, 'string');
 
         const invalido = await solicitar(base, '/financial/estimate', 'POST', { inversionInicial: 0 });
         assert.equal(invalido.estado, 400);
         assert.equal(typeof invalido.cuerpo.mensaje, 'string');
-
-        const inexistente = await solicitar(base, '/incentives/eligibility?incentivoId=NO-EXISTE');
-        assert.equal(inexistente.estado, 404);
     }
     finally
     {

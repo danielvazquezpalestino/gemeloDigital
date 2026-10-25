@@ -74,11 +74,13 @@ class Validacion
             return [`El campo "${campo}" debe ser un texto`, undefined];
         }
 
-        const normalizado = valor.trim().toUpperCase();
+        const normalizado = valor.trim().toLowerCase();
 
-        if (!(valoresValidos as readonly string[]).includes(normalizado))
+        const valoresNormalizados = (valoresValidos as readonly string[]).map((valorValido) => valorValido.toLowerCase());
+
+        if (!valoresNormalizados.includes(normalizado))
         {
-            return [`El campo "${campo}" es inválido. Valores permitidos: ${(valoresValidos as readonly string[]).join(', ')}`, undefined];
+            return [`El campo "${campo}" es inválido. Valores permitidos: ${valoresValidos.join(', ')}`, undefined];
         }
 
         return [undefined, normalizado as T];
