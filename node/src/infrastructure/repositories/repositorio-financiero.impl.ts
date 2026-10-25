@@ -1,5 +1,5 @@
-import DtoEstimacionFinanciera = require('../../domain/entities/dtos/financiero/estimacion-financiera.dto');
-import EstimacionFinanciera = require('../../domain/entities/estimacion-financiera.entidad');
+import DtoEstimarFinanciero = require('../../domain/entities/dtos/financiero/estimar-financiero.dto');
+import ResultadoFinanciero = require('../../domain/entities/resultado-financiero.entidad');
 import RepositorioFinanciero = require('../../domain/repositories/repositorio-financiero');
 import CalculadoraFinanciera = require('../../domain/servicios/calculadora-financiera');
 
@@ -10,7 +10,7 @@ class RepositorioFinancieroImpl extends RepositorioFinanciero
         super();
     }
 
-    calcularEstimacion(dto: DtoEstimacionFinanciera): EstimacionFinanciera
+    calcularEstimacion(dto: DtoEstimarFinanciero): ResultadoFinanciero
     {
         return this.calculadoraFinanciera.calcular(dto);
     }
