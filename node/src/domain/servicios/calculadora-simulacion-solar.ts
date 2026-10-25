@@ -1,4 +1,6 @@
+import RadiacionSolar = require('../entities/radiacion-solar.entidad');
 import ResultadoCalculoSolar = require('../entities/resultado-calculo-solar.entidad');
+import ResultadoProduccionSolar = require('../entities/resultado-produccion-solar.entidad');
 import TipoTarifa = require('../entities/tipo-tarifa');
 
 /**
@@ -15,6 +17,9 @@ class CalculadoraSimulacionSolar
 
     /** Pérdidas por orientación, suciedad y temperatura. */
     static readonly FACTOR_DESEMPENO = 0.85;
+
+    /** Días considerados para anualizar la producción solar. */
+    static readonly DIAS_POR_ANIO = 365;
 
     /** Superficie que ocupa cada panel (módulo + separación y margen). */
     static readonly AREA_PANEL_M2 = 1.7;
@@ -126,6 +131,36 @@ class CalculadoraSimulacionSolar
             CalculadoraSimulacionSolar.redondear(costoInversionTotal),
             CalculadoraSimulacionSolar.redondear(retornoInversionAnios),
             advertencias,
+        );
+    }
+
+    /**
+     * Estima la producción eléctrica de una capacidad instalada.
+     *
+     * Se reutiliza la convención de anualizar la radiación diaria y se aplica
+     * la eficiencia global del sistema enviada por el cliente.
+     */
+    calcularProduccion
+    (
+        capacidadKwp: number,
+        radiacion: RadiacionSolar,
+        eficiencia: number,
+    ): ResultadoProduccionSolar
+    {
+        const produccionAnualKwh = capacidadKwp
+            * radiacion.radiacionKwhM2Dia
+            * CalculadoraSimulacionSolar.DIAS_POR_ANIO
+            * eficiencia;
+        const produccionMensualKwh = produccionAnualKwh / 12;
+
+        return new ResultadoProduccionSolar(
+            CalculadoraSimulacionSolar.redondear(capacidadKwp),
+            CalculadoraSimulacionSolar.redondear(eficiencia),
+            CalculadoraSimulacionSolar.redondear(radiacion.radiacionKwhM2Dia),
+            CalculadoraSimulacionSolar.redondear(produccionMensualKwh),
+            CalculadoraSimulacionSolar.redondear(produccionAnualKwh),
+            radiacion.esEstimacion,
+            radiacion.fuente,
         );
     }
 

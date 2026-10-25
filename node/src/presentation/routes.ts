@@ -1,6 +1,6 @@
 import express = require('express');
 import AuthRoutes = require('./auth/routes');
-import RutasIncentivos = require('./incentivos/rutas');
+import RutasV1 = require('./rutas-v1');
 import RutasClima = require('./clima/rutas');
 import RutasAnalytics = require('./analytics/rutas');
 
@@ -12,10 +12,9 @@ class AppRoutes
      const router = express.Router();
 
         router.use('/api/Auth', AuthRoutes.routes);
-        router.use('/api/v1/incentives', RutasIncentivos.routes);
         router.use('/api/v1/weather', RutasClima.routes);
         router.use('/api/v1/analytics', RutasAnalytics.routes);
-
+        router.use('/api/v1', RutasV1.routes);
 
     return router;
    }
