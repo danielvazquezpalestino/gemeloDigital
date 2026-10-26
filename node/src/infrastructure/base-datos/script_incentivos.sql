@@ -43,5 +43,5 @@ CREATE TABLE IF NOT EXISTS incentivos (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Limpieza defensiva para poder re-ejecutar el script sin duplicados.
-DELETE FROM incentivos;
+-- El script es idempotente: `CREATE TABLE IF NOT EXISTS` no altera una tabla
+-- existente. No se ejecuta ninguna limpieza para no borrar datos reales.
