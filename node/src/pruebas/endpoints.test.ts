@@ -9,6 +9,7 @@ process.env['DB_HOST'] ??= 'localhost';
 process.env['DB_PORT'] ??= '3306';
 process.env['DB_USER'] ??= 'root';
 process.env['DB_NAME'] ??= 'gemeloDigital';
+process.env['JWT_SECRET'] ??= 'secreto-de-prueba';
 
 const RutasAplicacion: { routes: express.Router } = require('../presentation/routes');
 const pool: { end: () => Promise<void> } = require('../config/database');

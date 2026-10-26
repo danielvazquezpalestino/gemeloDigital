@@ -87,6 +87,14 @@ const swaggerDocumento = {
                             },
                         },
                     },
+                    '401': {
+                        description: 'Correo electrónico o contraseña incorrectos',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
                     '500': {
                         description: 'Error interno del servidor',
                         content: {
@@ -113,11 +121,11 @@ const swaggerDocumento = {
                     },
                 },
                 responses: {
-                    '200': {
+                    '201': {
                         description: 'Usuario registrado',
                         content: {
                             'application/json': {
-                                schema: { $ref: '#/components/schemas/UserResponse' },
+                                schema: { $ref: '#/components/schemas/RegistroResponse' },
                             },
                         },
                     },
@@ -1010,23 +1018,35 @@ const swaggerDocumento = {
             },
             LoginRequest: {
                 type: 'object',
+                required: ['correo', 'contrasenia'],
                 properties: {
-                    usuario: { type: 'string', description: 'Correo electrónico o identificador del usuario.' },
+                    correo: { type: 'string', format: 'email', description: 'Correo electrónico del usuario.' },
                     contrasenia: { type: 'string', description: 'Contraseña del usuario.' },
                 },
             },
             LoginResponse: {
                 type: 'object',
                 properties: {
-                    message: { type: 'string', description: 'Mensaje de respuesta.' },
+                    mensaje: { type: 'string', description: 'Mensaje de respuesta.' },
+                    token: { type: 'string', description: 'Token JWT de la sesión.' },
+                    expiraEnSegundos: { type: 'integer', description: 'Vigencia del token en segundos.' },
+                    usuario: { $ref: '#/components/schemas/UserResponse' },
                 },
             },
             RegistroRequest: {
                 type: 'object',
+                required: ['nombre', 'correo', 'contrasenia'],
                 properties: {
-                    nombre: { type: 'string' },
-                    correoElectronico: { type: 'string' },
-                    contrasenia: { type: 'string' },
+                    nombre: { type: 'string', maxLength: 100 },
+                    correo: { type: 'string', format: 'email', maxLength: 150 },
+                    contrasenia: { type: 'string', minLength: 8, maxLength: 128 },
+                },
+            },
+            RegistroResponse: {
+                type: 'object',
+                properties: {
+                    mensaje: { type: 'string', description: 'Mensaje de respuesta.' },
+                    usuario: { $ref: '#/components/schemas/UserResponse' },
                 },
             },
             UserResponse: {
@@ -1034,8 +1054,7 @@ const swaggerDocumento = {
                 properties: {
                     id: { type: 'integer' },
                     nombre: { type: 'string' },
-                    correoElectronico: { type: 'string' },
-                    imagen: { type: 'string', nullable: true },
+                    correo: { type: 'string' },
                     roles: { type: 'array', items: { type: 'string' } },
                 },
             },

@@ -1,0 +1,87 @@
+<main class="pagina">
+    <section class="tarjeta" aria-labelledby="titulo-inicio-sesion">
+        <header class="encabezado">
+            <div class="marca">
+                <span class="marca__icono" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" role="presentation">
+                        <circle cx="12" cy="8" r="3.2" fill="currentColor" />
+                        <path d="M12 1.5v2M12 12.5v2M5.5 8h2M16.5 8h2M7.4 3.4l1.4 1.4M15.2 11.2l1.4 1.4M16.6 3.4l-1.4 1.4M8.8 11.2l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        <path d="M5 16h14v5H5z" fill="currentColor" opacity="0.9" />
+                        <path d="M8.5 16v5M12 16v5M15.5 16v5" stroke="#06202e" stroke-width="1" />
+                    </svg>
+                </span>
+                <span class="marca__texto">Gemelo Digital</span>
+            </div>
+
+            <h1 id="titulo-inicio-sesion">Iniciar sesión</h1>
+            <p class="subtitulo">Accede al panel de monitoreo de tu sistema solar.</p>
+        </header>
+
+        <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate [attr.aria-busy]="enviando()">
+            <div class="campo">
+                <label for="correo">Correo electrónico</label>
+                <input
+                    id="correo"
+                    type="email"
+                    formControlName="correo"
+                    autocomplete="username"
+                    inputmode="email"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    [attr.aria-invalid]="formulario.controls.correo.touched && formulario.controls.correo.invalid ? 'true' : null"
+                    [attr.aria-describedby]="formulario.controls.correo.touched && formulario.controls.correo.invalid ? 'error-correo' : null"
+                />
+
+                @if (formulario.controls.correo.touched && formulario.controls.correo.errors?.['required']) {
+                    <p id="error-correo" class="campo__error">El correo electrónico es obligatorio.</p>
+                } @else if (formulario.controls.correo.touched && formulario.controls.correo.errors?.['email']) {
+                    <p id="error-correo" class="campo__error">Ingresa un correo electrónico válido.</p>
+                }
+            </div>
+
+            <div class="campo">
+                <label for="contrasenia">Contraseña</label>
+                <div class="campo__control">
+                    <input
+                        id="contrasenia"
+                        [type]="mostrarContrasenia() ? 'text' : 'password'"
+                        formControlName="contrasenia"
+                        autocomplete="current-password"
+                        [attr.aria-invalid]="formulario.controls.contrasenia.touched && formulario.controls.contrasenia.invalid ? 'true' : null"
+                        [attr.aria-describedby]="formulario.controls.contrasenia.touched && formulario.controls.contrasenia.invalid ? 'error-contrasenia' : null"
+                    />
+                    <button
+                        type="button"
+                        class="campo__alternar"
+                        (click)="alternarContrasenia()"
+                        [attr.aria-label]="mostrarContrasenia() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                        [attr.aria-pressed]="mostrarContrasenia()"
+                    >
+                        {{ mostrarContrasenia() ? 'Ocultar' : 'Mostrar' }}
+                    </button>
+                </div>
+
+                @if (formulario.controls.contrasenia.touched && formulario.controls.contrasenia.errors?.['required']) {
+                    <p id="error-contrasenia" class="campo__error">La contraseña es obligatoria.</p>
+                } @else if (formulario.controls.contrasenia.touched && formulario.controls.contrasenia.errors?.['minlength']) {
+                    <p id="error-contrasenia" class="campo__error">La contraseña debe tener al menos 8 caracteres.</p>
+                }
+            </div>
+
+            @if (mensajeError(); as mensaje) {
+                <div class="alerta" role="alert">{{ mensaje }}</div>
+            }
+
+            <button type="submit" class="boton" [disabled]="enviando()">
+                @if (enviando()) {
+                    <span class="boton__cargador" aria-hidden="true"></span>
+                    Ingresando...
+                } @else {
+                    Ingresar
+                }
+            </button>
+        </form>
+
+        <p class="nota">¿Aún no tienes cuenta? Solicita acceso al administrador del sistema.</p>
+    </section>
+</main>

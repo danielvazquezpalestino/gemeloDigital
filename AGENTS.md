@@ -12,7 +12,10 @@ Expone endpoints de autenticación.
 
 - **Raíz del backend:** `node/`
 - **Raíz del repositorio (git):** la carpeta que contiene `node/`
-- **Estado actual:** solo existe el módulo de autenticación (registro e inicio de sesión).
+- **Estado actual:** el módulo de autenticación persiste usuarios en MySQL
+  (tabla `usuarios`), cifra las contraseñas con scrypt y emite tokens JWT. El
+  frontend Angular vive en `gemeloDigital/` y tiene su propia guía
+  `AGENTSANGULAR.md`.
 
 ## 2. Stack
 
@@ -153,8 +156,13 @@ node/
 
 | Método | Ruta | Controlador | Estado |
 |---|---|---|---|
-| POST | `/api/Autenticacion/registro` | `ControladorAutenticacion.registrarUsuario` | Valida DTO y devuelve el usuario |
-| POST | `/api/Autenticacion/inicio-sesion` | `ControladorAutenticacion.iniciarSesion` | **Pendiente de implementar** (devuelve mensaje fijo) |
+| POST | `/api/Auth/register` | `ControladorAutenticacion.registrar` | Persiste en `usuarios`, cifra la contraseña y responde 201 con el usuario público |
+| POST | `/api/Auth/login` | `ControladorAutenticacion.iniciarSesion` | Valida credenciales y responde 200 con token JWT y usuario público |
+
+La tabla `usuarios` se crea con `node/src/infrastructure/base-datos/script_usuarios.sql`
+(idempotente). El módulo requiere además `JWT_SECRET` y, opcionalmente,
+`JWT_EXPIRACION_SEGUNDOS` (7200 por defecto) en `node/src/.env` y en
+`node/src/.env.example`.
 
 ## 4. Convenciones de código
 
@@ -283,6 +291,19 @@ npx tsc --noEmit     # comprobación de tipos rápida
 npm run build        # debe terminar con código 0
 ```
 
+### 5.1 Frontend (`gemeloDigital/`)
+
+```bash
+cd gemeloDigital
+
+npm start                    # ng serve en http://localhost:4200 con proxy /api -> 127.0.0.1:3100
+npm run build                # compilación de producción (incluye SSR)
+npx ng test --watch=false    # pruebas unitarias (Vitest)
+```
+
+El proxy de desarrollo está en `gemeloDigital/proxy.conf.json`; las rutas de la
+API se consumen con la URL base `/api`.
+
 El arranque **requiere MySQL accesible**: `BaseDatos.conectar()` es una dependencia dura y,
 si falla, el proceso termina con código 1. Para levantar el servidor sin MySQL,
 usar las pruebas o montar las rutas en una app de Express aislada.
@@ -364,18 +385,15 @@ El código existente está escrito en **inglés** (clases, métodos, variables y
 | Clave JSON `error` | Clave JSON `mensaje` |
 | Valor `ADMIN_ROLE` | Valor `ROL_ADMIN` |
 
-### 6.5 Pendientes de funcionalidad (fuera del alcance del renombrado)
+### 6.5 Pendientes de funcionalidad
 
-Estos NO son renombrados; son trabajo de implementación pendiente:
-
-1. **El registro no persiste en MySQL.** `FuenteDatosAutenticacionImpl.registrar` solo
-   construye la entidad en memoria: no hay ninguna consulta SQL en el proyecto.
-2. **El inicio de sesión no valida nada.** Devuelve un mensaje fijo sin comprobar credenciales.
-3. **Las contraseñas no se cifran** y **se devuelven al cliente** dentro del JSON del usuario.
-4. **No hay verificación de correo duplicado** ni generación de `id` en el servidor.
-5. **Faltan manejador global de errores, 404 en JSON, CORS, cabeceras de seguridad y
+1. **Protección de rutas de la API.** El token JWT se emite, pero todavía no se
+   verifica en ningún middleware ni hay endpoints que exijan autenticación.
+2. **Cierre de sesión del lado del servidor.** No hay lista de revocación ni
+   refresh tokens; el frontend elimina el token de su almacenamiento local.
+3. **Faltan manejador global de errores, 404 en JSON, CORS, cabeceras de seguridad y
    limitador de peticiones** en los endpoints de autenticación.
-6. **No hay apagado ordenado**: el pool de MySQL nunca se cierra y no se atienden
+4. **No hay apagado ordenado**: el pool de MySQL nunca se cierra y no se atienden
    `SIGTERM`/`SIGINT`. El servidor tampoco captura errores de `listen` (p. ej. `EADDRINUSE`).
 
 ## 7. Cómo agregar un módulo nuevo

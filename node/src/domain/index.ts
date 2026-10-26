@@ -1,21 +1,21 @@
-
-
-import registerUserDTO = require('./entities/dtos/auth/register-user.dtos');
-import User = require('./entities/user.entities');
+import DtoInicioSesion = require('./entities/dtos/autenticacion/inicio-sesion.dto');
+import DtoRegistroUsuario = require('./entities/dtos/autenticacion/registro-usuario.dto');
+import ErrorPersonalizado = require('./datasources/errors/custom-error');
+import FuenteDatosAutenticacion = require('./datasources/fuente-datos-autenticacion');
 import Municipio = require('./entities/municipio.entidad');
-import CustomError = require('./datasources/errors/custom.error');
-import AuthDatasource = require('./datasources/auth.datasource');
-import AuthRepository = require('./repositories/auth.repository');
-     
+import RepositorioAutenticacion = require('./repositories/repositorio-autenticacion');
+import Sesion = require('./entities/sesion.entidad');
+import Usuario = require('./entities/usuario.entidad');
 
-
-const domain = {
-    registerUserDTO,
-    User,
+const dominio = {
+    DtoInicioSesion,
+    DtoRegistroUsuario,
+    ErrorPersonalizado,
+    FuenteDatosAutenticacion,
     Municipio,
-    CustomError,
-    AuthDatasource,
-    AuthRepository
+    RepositorioAutenticacion,
+    Sesion,
+    Usuario,
 };
 
-export = domain;
+export = dominio;

@@ -1,0 +1,50 @@
+<header class="cabecera">
+    <div class="marca">
+        <span class="marca__icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" role="presentation">
+                <circle cx="12" cy="8" r="3.2" fill="currentColor" />
+                <path d="M5 16h14v5H5z" fill="currentColor" opacity="0.9" />
+                <path d="M8.5 16v5M12 16v5M15.5 16v5" stroke="#06202e" stroke-width="1" />
+            </svg>
+        </span>
+        <span>Gemelo Digital</span>
+    </div>
+
+    @if (usuarioActual(); as usuario) {
+        <div class="sesion">
+            <span class="sesion__nombre">{{ usuario.nombre }}</span>
+            <button type="button" class="boton-salir" (click)="cerrar()">Cerrar sesión</button>
+        </div>
+    }
+</header>
+
+<main class="contenido">
+    @if (usuarioActual(); as usuario) {
+        <section class="bienvenida" aria-labelledby="titulo-panel">
+            <p class="etiqueta">Sesión activa</p>
+            <h1 id="titulo-panel">Hola, {{ usuario.nombre }}</h1>
+            <p class="descripcion">
+                Accediste como <strong>{{ usuario.correo }}</strong>. Este es el punto de partida
+                del panel del gemelo digital.
+            </p>
+        </section>
+
+        <section class="tarjetas" aria-label="Módulos disponibles">
+            <article class="tarjeta">
+                <h2>Monitoreo</h2>
+                <p>Estado del sistema y telemetría en tiempo real.</p>
+                <span class="tarjeta__estado">Próximamente</span>
+            </article>
+            <article class="tarjeta">
+                <h2>Producción solar</h2>
+                <p>Generación estimada y radiación del sitio.</p>
+                <span class="tarjeta__estado">Próximamente</span>
+            </article>
+            <article class="tarjeta">
+                <h2>Ahorro</h2>
+                <p>Comparativa de consumo, tarifas e incentivos.</p>
+                <span class="tarjeta__estado">Próximamente</span>
+            </article>
+        </section>
+    }
+</main>
