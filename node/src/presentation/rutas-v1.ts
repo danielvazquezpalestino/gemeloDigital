@@ -3,6 +3,7 @@ import RutasElectricidad = require('./electricidad/rutas');
 import RutasFinanciero = require('./financiero/rutas');
 import RutasIncentivos = require('./incentivos/rutas');
 import RutasPaneles = require('./paneles/rutas');
+import RutasSimulaciones = require('./simulaciones/rutas');
 import RutasSolar = require('./solar/rutas');
 
 /**
@@ -20,6 +21,7 @@ class RutasV1
         router.use('/panels', RutasPaneles.routes);
         router.use('/financial', RutasFinanciero.routes);
         router.use('/incentives', RutasIncentivos.routes);
+        router.use('/simulaciones', RutasSimulaciones.routes);
         router.use('/solar', RutasSolar.routes);
 
         return router;

@@ -752,6 +752,253 @@ const swaggerDocumento = {
                 },
             },
         },
+        '/api/v1/simulaciones': {
+            post: {
+                tags: ['Simulaciones'],
+                summary: 'Crear simulación solar',
+                description: 'Calcula y registra una nueva simulación solar para un municipio.',
+                operationId: 'crearSimulacion',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/SimulacionCrear' },
+                        },
+                    },
+                },
+                responses: {
+                    '201': {
+                        description: 'Simulación solar creada correctamente',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        mensaje: { type: 'string' },
+                                        simulacion: { type: 'object' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: 'Datos de simulación inválidos',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: 'Error interno del servidor',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                },
+            },
+            get: {
+                tags: ['Simulaciones'],
+                summary: 'Obtener historial de simulaciones',
+                description: 'Obtiene el historial paginado de simulaciones solares.',
+                operationId: 'obtenerHistorialSimulaciones',
+                parameters: [
+                    {
+                        name: 'municipioId',
+                        in: 'query',
+                        required: false,
+                        schema: { type: 'integer', minimum: 1 },
+                        description: 'Filtro por municipio.',
+                    },
+                    {
+                        name: 'pagina',
+                        in: 'query',
+                        required: false,
+                        schema: { type: 'integer', minimum: 1, default: 1 },
+                        description: 'Página solicitada.',
+                    },
+                    {
+                        name: 'limite',
+                        in: 'query',
+                        required: false,
+                        schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+                        description: 'Cantidad de registros por página (máximo 100).',
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Simulaciones obtenidas correctamente',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        mensaje: { type: 'string' },
+                                        total: { type: 'integer' },
+                                        pagina: { type: 'integer' },
+                                        limite: { type: 'integer' },
+                                        simulaciones: { type: 'array', items: { type: 'object' } },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: 'Parámetros de consulta inválidos',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: 'Error interno del servidor',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        '/api/v1/simulaciones/{id}': {
+            get: {
+                tags: ['Simulaciones'],
+                summary: 'Obtener una simulación por identificador',
+                description: 'Obtiene una simulación solar por su identificador.',
+                operationId: 'obtenerSimulacion',
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer', minimum: 1 },
+                        description: 'Identificador de la simulación.',
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Simulación obtenida correctamente',
+                        content: {
+                            'application/json': {
+                                schema: { type: 'object', properties: { mensaje: { type: 'string' }, simulacion: { type: 'object' } } },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: 'Identificador inválido',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: 'Error interno del servidor',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                },
+            },
+            delete: {
+                tags: ['Simulaciones'],
+                summary: 'Eliminar una simulación',
+                description: 'Elimina una simulación solar registrada.',
+                operationId: 'eliminarSimulacion',
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer', minimum: 1 },
+                        description: 'Identificador de la simulación.',
+                    },
+                ],
+                responses: {
+                    '200': {
+                        description: 'Simulación eliminada correctamente',
+                        content: {
+                            'application/json': {
+                                schema: { type: 'object', properties: { mensaje: { type: 'string' }, id: { type: 'integer' } } },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: 'Identificador inválido',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: 'Error interno del servidor',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        '/api/v1/simulaciones/{id}/recalcular': {
+            post: {
+                tags: ['Simulaciones'],
+                summary: 'Recalcular una simulación',
+                description: 'Recalcula una simulación solar existente con nuevos datos.',
+                operationId: 'recalcularSimulacion',
+                parameters: [
+                    {
+                        name: 'id',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer', minimum: 1 },
+                        description: 'Identificador de la simulación.',
+                    },
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/RecalcularSimulacion' },
+                        },
+                    },
+                },
+                responses: {
+                    '200': {
+                        description: 'Simulación recalculada correctamente',
+                        content: {
+                            'application/json': {
+                                schema: { type: 'object', properties: { mensaje: { type: 'string' }, simulacion: { type: 'object' } } },
+                            },
+                        },
+                    },
+                    '400': {
+                        description: 'Datos de recalculo inválidos',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                    '500': {
+                        description: 'Error interno del servidor',
+                        content: {
+                            'application/json': {
+                                schema: { $ref: '#/components/schemas/Error' },
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
     components: {
         schemas: {
@@ -962,6 +1209,48 @@ const swaggerDocumento = {
                 properties: {
                     mensaje: { type: 'string' },
                     resultado: { type: 'object' },
+                },
+            },
+            SimulacionCrear: {
+                type: 'object',
+                properties: {
+                    municipioId: { type: 'integer' },
+                    consumoKwh: { type: 'number' },
+                    tarifaCfe: { type: 'number' },
+                    areaDisponibleM2: { type: 'number', nullable: true },
+                    tipoTarifa: { type: 'string' },
+                    incluyeBaterias: { type: 'boolean' },
+                },
+            },
+            RecalcularSimulacion: {
+                type: 'object',
+                properties: {
+                    municipioId: { type: 'integer' },
+                    consumoKwh: { type: 'number' },
+                    tarifaCfe: { type: 'number' },
+                    areaDisponibleM2: { type: 'number', nullable: true },
+                    tipoTarifa: { type: 'string' },
+                    incluyeBaterias: { type: 'boolean' },
+                },
+            },
+            Simulacion: {
+                type: 'object',
+                properties: {
+                    id: { type: 'integer' },
+                    municipioId: { type: 'integer' },
+                    consumoKwh: { type: 'number' },
+                    tarifaCfe: { type: 'number' },
+                    areaDisponibleM2: { type: 'number', nullable: true },
+                    tipoTarifa: { type: 'string' },
+                    incluyeBaterias: { type: 'boolean' },
+                    panelesNecesarios: { type: 'integer' },
+                    produccionAnual: { type: 'number' },
+                    ahorroEstimado: { type: 'number' },
+                    costoInversionTotal: { type: 'number' },
+                    retornoInversionAnos: { type: 'number' },
+                    advertencias: { type: 'array', items: { type: 'string' } },
+                    fechaCreacion: { type: 'string', format: 'date-time' },
+                    fechaActualizacion: { type: 'string', format: 'date-time' },
                 },
             },
         },
