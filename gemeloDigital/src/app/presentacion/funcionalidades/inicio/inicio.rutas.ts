@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
-import { autenticacionGuardia } from '../autenticacion/autenticacion.guardia';
 
 /**
- * Rutas de la funcionalidad de inicio (panel protegido).
+ * Ruta de la página de inicio del panel.
+ *
+ * Es una ruta hija del armazón compartido, por eso su `path` es vacío.
  */
 export const rutasInicio: Routes = [
     {
-        path: 'panel',
+        path: '',
         title: 'Panel | Gemelo Digital',
-        canActivate: [autenticacionGuardia],
         loadComponent: () => import('./panelInicio').then((modulo) => modulo.panelInicio),
     },
 ];

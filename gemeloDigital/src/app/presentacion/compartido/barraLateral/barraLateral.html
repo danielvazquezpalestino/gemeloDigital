@@ -1,0 +1,47 @@
+<aside class="barra" [class.barra--abierta]="abierto()" aria-label="Barra lateral">
+    <button #botonCerrar type="button" class="boton-cerrar" (click)="cerrar.emit()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" />
+        </svg>
+        <span class="solo-lectores">Cerrar menú de navegación</span>
+    </button>
+
+    <div class="marca">
+        <span class="marca__icono" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                <circle cx="12" cy="8" r="3.2" fill="currentColor" />
+                <path d="M5 16h14v5H5z" fill="currentColor" opacity="0.9" />
+                <path d="M8.5 16v5M12 16v5M15.5 16v5" stroke="#06202e" stroke-width="1" />
+            </svg>
+        </span>
+        <span class="marca__texto">
+            <span class="marca__nombre">Gemelo Digital</span>
+            <span class="marca__detalle">Monitoreo solar</span>
+        </span>
+    </div>
+
+    <nav class="navegacion" id="navegacion-principal" aria-labelledby="titulo-navegacion">
+        <p class="navegacion__titulo" id="titulo-navegacion">Secciones</p>
+
+        <ul class="navegacion__lista">
+            @for (seccion of secciones; track seccion.ruta) {
+                <li class="navegacion__elemento">
+                    <a
+                        class="enlace"
+                        [routerLink]="seccion.ruta"
+                        routerLinkActive="enlace--activo"
+                        [routerLinkActiveOptions]="{ exact: true }"
+                        ariaCurrentWhenActive="page"
+                        (click)="cerrar.emit()"
+                    >
+                        <gd-icono-seccion [tipo]="seccion.icono" />
+                        <span>{{ seccion.etiqueta }}</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+
+    <p class="pie">Prototipo · Datos del gemelo digital</p>
+</aside>

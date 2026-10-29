@@ -4,6 +4,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideRouter } from '@angular/router';
 import { autenticacionInterceptor } from './infraestructura/http/autenticacion.interceptor';
 import { proveedoresAutenticacion } from './nucleo/proveedores/proveedoresAutenticacion';
+import { proveedoresModulos } from './nucleo/proveedores/proveedoresModulos';
 import { routes } from './app.routes';
 
 /**
@@ -19,5 +20,6 @@ export const appConfig: ApplicationConfig = {
         provideClientHydration(withEventReplay()),
         provideHttpClient(withFetch(), withInterceptors([autenticacionInterceptor])),
         ...proveedoresAutenticacion,
+        ...proveedoresModulos,
     ],
 };

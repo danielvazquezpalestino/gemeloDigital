@@ -1,13 +1,14 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { errorApi } from '../../dominio/errores/errorApi';
 import { errorAutenticacion } from '../../dominio/errores/errorAutenticacion';
-import { repositorioAutenticacion } from '../../aplicacion/puertos/repositorioAutenticacion';
-import { respuestaErrorDto } from '../dto/respuestaError.dto';
-import { respuestaSesionDto } from '../dto/respuestaSesion.dto';
 import { sesion } from '../../dominio/entidades/sesion.entidad';
+import { usuario } from '../../dominio/entidades/usuario.entidad';
+import { repositorioAutenticacion } from '../../aplicacion/puertos/repositorioAutenticacion';
+import { respuestaRegistroDto } from '../dto/respuestaRegistro.dto';
+import { respuestaSesionDto } from '../dto/respuestaSesion.dto';
+import { clienteApi } from '../http/clienteApi';
 import { sesionMapeador } from '../mapeadores/sesion.mapeador';
-import { urlBaseApi } from '../../nucleo/configuracion/entorno';
+import { usuarioMapeador } from '../mapeadores/usuario.mapeador';
 
 /**
  * Adaptador HTTP del puerto de autenticación.
@@ -18,53 +19,56 @@ import { urlBaseApi } from '../../nucleo/configuracion/entorno';
 @Injectable({ providedIn: 'root' })
 export class repositorioAutenticacionHttp extends repositorioAutenticacion
 {
-    private readonly http = inject(HttpClient);
-    private readonly urlBaseApi = inject(urlBaseApi);
+    private readonly cliente = inject(clienteApi);
+
+    async registrar(nombre: string, correo: string, contrasenia: string): Promise<usuario>
+    {
+        try
+        {
+            const respuesta = await this.cliente.enviar<respuestaRegistroDto>(
+                '/Auth/register',
+                { nombre, correo, contrasenia },
+                'No se pudo registrar el usuario',
+            );
+
+            return usuarioMapeador.aDominio(respuesta.usuario);
+        }
+        catch (excepcion)
+        {
+            throw this.traducirError(excepcion, 'No se pudo registrar el usuario');
+        }
+    }
 
     async iniciarSesion(correo: string, contrasenia: string): Promise<sesion>
     {
         try
         {
-            const respuesta = await firstValueFrom(
-                this.http.post<respuestaSesionDto>(`${this.urlBaseApi}/Auth/login`, { correo, contrasenia }),
+            const respuesta = await this.cliente.enviar<respuestaSesionDto>(
+                '/Auth/login',
+                { correo, contrasenia },
+                'No se pudo iniciar sesión',
             );
 
             return sesionMapeador.aDominio(respuesta);
         }
         catch (excepcion)
         {
-            throw this.traducirError(excepcion);
+            throw this.traducirError(excepcion, 'No se pudo iniciar sesión');
         }
     }
 
-    private traducirError(excepcion: unknown): errorAutenticacion
+    private traducirError(excepcion: unknown, mensajePorDefecto: string): errorAutenticacion
     {
-        if (excepcion instanceof HttpErrorResponse)
+        if (excepcion instanceof errorAutenticacion)
         {
-            if (excepcion.status === 0)
-            {
-                return new errorAutenticacion(
-                    'No se pudo conectar con el servidor. Verifica que la API esté disponible.',
-                );
-            }
-
-            return new errorAutenticacion(
-                this.extraerMensaje(excepcion.error) ?? 'No se pudo iniciar sesión',
-            );
+            return excepcion;
         }
 
-        return new errorAutenticacion('Ocurrió un error inesperado al iniciar sesión');
-    }
-
-    private extraerMensaje(cuerpo: unknown): string | null
-    {
-        if (typeof cuerpo !== 'object' || cuerpo === null)
+        if (excepcion instanceof errorApi)
         {
-            return null;
+            return new errorAutenticacion(excepcion.message);
         }
 
-        const mensaje = (cuerpo as respuestaErrorDto).mensaje;
-
-        return typeof mensaje === 'string' && mensaje.trim() !== '' ? mensaje : null;
+        return new errorAutenticacion(mensajePorDefecto);
     }
 }

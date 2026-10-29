@@ -1,50 +1,162 @@
-<header class="cabecera">
-    <div class="marca">
-        <span class="marca__icono" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" role="presentation">
-                <circle cx="12" cy="8" r="3.2" fill="currentColor" />
-                <path d="M5 16h14v5H5z" fill="currentColor" opacity="0.9" />
-                <path d="M8.5 16v5M12 16v5M15.5 16v5" stroke="#06202e" stroke-width="1" />
-            </svg>
-        </span>
-        <span>Gemelo Digital</span>
-    </div>
+@if (usuarioActual(); as usuario) {
+    <section class="bienvenida" aria-labelledby="titulo-panel">
+        <p class="etiqueta">Sesión activa</p>
+        <h2 class="bienvenida__saludo" id="titulo-panel">Hola, {{ usuario.nombre }}</h2>
+        <p class="descripcion">
+            Accediste como <strong>{{ usuario.correo }}</strong>. Desde aquí puedes revisar el
+            panorama del municipio y abrir cualquier módulo del gemelo digital.
+        </p>
+    </section>
+}
 
-    @if (usuarioActual(); as usuario) {
-        <div class="sesion">
-            <span class="sesion__nombre">{{ usuario.nombre }}</span>
-            <button type="button" class="boton-salir" (click)="cerrar()">Cerrar sesión</button>
+<section class="panel" aria-labelledby="titulo-estadisticas">
+    <h2 class="panel__titulo" id="titulo-estadisticas">Panorama del municipio</h2>
+    <p class="panel__descripcion">
+        Estadísticas agregadas de consumo, producción y ahorro. Filtra por municipio y por
+        periodo; si dejas los campos vacíos se usa el consolidado completo.
+    </p>
+
+    <form class="formulario" [formGroup]="formulario" (ngSubmit)="cargarEstadisticas()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="resumen-municipio">Municipio (id)</label>
+            <input
+                class="campo__control"
+                id="resumen-municipio"
+                type="number"
+                min="1"
+                formControlName="municipioId"
+                placeholder="Todos"
+                [attr.aria-invalid]="formulario.controls.municipioId.invalid && formulario.controls.municipioId.touched"
+            />
+            @if (formulario.controls.municipioId.touched && formulario.controls.municipioId.invalid) {
+                <span class="campo__error">El identificador debe ser positivo.</span>
+            }
         </div>
-    }
-</header>
 
-<main class="contenido">
-    @if (usuarioActual(); as usuario) {
-        <section class="bienvenida" aria-labelledby="titulo-panel">
-            <p class="etiqueta">Sesión activa</p>
-            <h1 id="titulo-panel">Hola, {{ usuario.nombre }}</h1>
-            <p class="descripcion">
-                Accediste como <strong>{{ usuario.correo }}</strong>. Este es el punto de partida
-                del panel del gemelo digital.
-            </p>
-        </section>
+        <div class="campo">
+            <label class="campo__etiqueta" for="resumen-periodo">Periodo (días)</label>
+            <input
+                class="campo__control"
+                id="resumen-periodo"
+                type="number"
+                min="1"
+                max="3650"
+                formControlName="periodoDias"
+                placeholder="Histórico completo"
+                [attr.aria-invalid]="formulario.controls.periodoDias.invalid && formulario.controls.periodoDias.touched"
+            />
+            @if (formulario.controls.periodoDias.touched && formulario.controls.periodoDias.invalid) {
+                <span class="campo__error">Entre 1 y 3650 días.</span>
+            }
+        </div>
 
-        <section class="tarjetas" aria-label="Módulos disponibles">
-            <article class="tarjeta">
-                <h2>Monitoreo</h2>
-                <p>Estado del sistema y telemetría en tiempo real.</p>
-                <span class="tarjeta__estado">Próximamente</span>
-            </article>
-            <article class="tarjeta">
-                <h2>Producción solar</h2>
-                <p>Generación estimada y radiación del sitio.</p>
-                <span class="tarjeta__estado">Próximamente</span>
-            </article>
-            <article class="tarjeta">
-                <h2>Ahorro</h2>
-                <p>Comparativa de consumo, tarifas e incentivos.</p>
-                <span class="tarjeta__estado">Próximamente</span>
-            </article>
-        </section>
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargando()">
+                {{ cargando() ? 'Actualizando…' : 'Actualizar panorama' }}
+            </button>
+        </div>
+    </form>
+
+    @if (mensajeError(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
     }
-</main>
+
+    @if (cargando()) {
+        <p class="cargando" role="status">Calculando las estadísticas…</p>
+    }
+
+    @if (estadisticas(); as datos) {
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Simulaciones</p>
+                <p class="dato__valor">{{ datos.simulaciones | number: '1.0-0' }}</p>
+                <p class="dato__detalle">
+                    {{ datos.municipioId === null ? 'Todos los municipios' : 'Municipio ' + datos.municipioId }}
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Consumo mensual</p>
+                <p class="dato__valor">{{ datos.consumoElectrico.mensual | number: '1.0-0' }} kWh</p>
+                <p class="dato__detalle">
+                    {{ datos.consumoElectrico.anual | number: '1.0-0' }} kWh al año
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Producción mensual</p>
+                <p class="dato__valor">{{ datos.produccionSolar.mensual | number: '1.0-0' }} kWh</p>
+                <p class="dato__detalle">
+                    {{ datos.produccionSolar.anual | number: '1.0-0' }} kWh al año
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Capacidad recomendada</p>
+                <p class="dato__valor">
+                    {{ datos.capacidadFotovoltaica.recomendada | number: '1.0-1' }} kWp
+                </p>
+                <p class="dato__detalle">
+                    Instalada:
+                    {{ datos.capacidadFotovoltaica.instalada === null ? 'sin registro' : (datos.capacidadFotovoltaica.instalada | number: '1.0-1') + ' kWp' }}
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Ahorro económico</p>
+                <p class="dato__valor">{{ datos.ahorroEconomico | number: '1.0-2' }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Emisiones evitadas</p>
+                <p class="dato__valor">
+                    {{ datos.emisionesCarbono.toneladas | number: '1.0-2' }} t
+                </p>
+                <p class="dato__detalle">
+                    {{ datos.emisionesCarbono.kg | number: '1.0-0' }} kg de CO₂
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Instalaciones</p>
+                <p class="dato__valor">
+                    {{ datos.instalacionesRegistradas === null ? 'Sin registro' : (datos.instalacionesRegistradas | number: '1.0-0') }}
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Actualizado</p>
+                <p class="dato__valor dato__valor--fecha">
+                    {{ datos.fechaActualizacion | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
+            </div>
+        </div>
+
+        @if (datos.simulacionesPorTipoBeneficiario.length > 0) {
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <caption>Simulaciones por tipo de beneficiario</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Beneficiario</th>
+                            <th scope="col" class="tabla__numero">Simulaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (fila of datos.simulacionesPorTipoBeneficiario; track fila.beneficiario) {
+                            <tr>
+                                <th scope="row">{{ fila.beneficiario }}</th>
+                                <td class="tabla__numero">{{ fila.total | number: '1.0-0' }}</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+</section>
+
+<section class="tarjetas" aria-labelledby="titulo-modulos">
+    <h2 class="tarjetas__titulo" id="titulo-modulos">Módulos del gemelo digital</h2>
+
+    @for (modulo of modulos; track modulo.ruta) {
+        <a class="tarjeta" [routerLink]="modulo.ruta">
+            <h3 class="tarjeta__titulo">{{ modulo.titulo }}</h3>
+            <p class="tarjeta__texto">{{ modulo.descripcion }}</p>
+            <span class="tarjeta__accion" aria-hidden="true">Abrir sección →</span>
+        </a>
+    }
+</section>

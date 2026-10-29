@@ -1,0 +1,42 @@
+<header class="encabezado">
+    <button
+        #botonMenu
+        type="button"
+        class="boton-menu"
+        [attr.aria-expanded]="menuAbierto()"
+        aria-controls="navegacion-principal"
+        (click)="abrirMenu.emit()"
+    >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" />
+        </svg>
+        <span class="solo-lectores">Abrir menú de navegación</span>
+    </button>
+
+    <div class="identidad">
+        <p class="identidad__contexto">Gemelo Digital</p>
+        <h1 class="identidad__pagina">{{ titulo() }}</h1>
+    </div>
+
+    @if (usuarioActual(); as usuario) {
+        <div class="sesion">
+            <span class="sesion__avatar" aria-hidden="true">{{ iniciales() }}</span>
+
+            <span class="sesion__datos">
+                <span class="sesion__nombre">{{ usuario.nombre }}</span>
+                <span class="sesion__correo">{{ usuario.correo }}</span>
+            </span>
+
+            <button type="button" class="boton-salir" (click)="cerrar()">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                    <path d="M15 4h3.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H15"
+                        stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                    <path d="M10 8l-4 4 4 4M6 12h9" stroke="currentColor" stroke-width="1.7"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span>Cerrar sesión</span>
+            </button>
+        </div>
+    }
+</header>

@@ -1,3 +1,5 @@
+import { usuarioDto } from './usuario.dto';
+
 /**
  * DTO de la respuesta de `POST /api/Auth/login`.
  *
@@ -9,10 +11,5 @@ export interface respuestaSesionDto
     readonly mensaje: string;
     readonly token: string;
     readonly expiraEnSegundos: number;
-    readonly usuario: {
-        readonly id: number;
-        readonly nombre: string;
-        readonly correo: string;
-        readonly roles: readonly string[];
-    };
+    readonly usuario: usuarioDto;
 }

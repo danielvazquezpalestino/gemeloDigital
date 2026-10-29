@@ -1,0 +1,22 @@
+@use '../../compartido/estilos/formularios';
+
+:host {
+    display: block;
+}
+
+.positivo {
+    color: #86efac;
+}
+
+.negativo {
+    color: #fca5a5;
+}
+
+.advertencias {
+    margin-top: 1.1rem;
+}
+
+.advertencias__titulo {
+    margin: 0 0 0.35rem;
+    font-size: 0.85rem;
+}

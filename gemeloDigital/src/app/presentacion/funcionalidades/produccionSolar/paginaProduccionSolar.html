@@ -1,0 +1,275 @@
+<section class="panel" aria-labelledby="titulo-sistema">
+    <h2 class="panel__titulo" id="titulo-sistema">Radiación y producción</h2>
+    <p class="panel__descripcion">
+        Indica la ubicación con coordenadas o con el identificador de municipio.
+        Si dejas las coordenadas vacías se usa el municipio. La capacidad y la
+        eficiencia alimentan el cálculo de producción.
+    </p>
+
+    <form class="formulario" [formGroup]="formularioSistema" (ngSubmit)="calcularProduccion()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="solar-latitud">Latitud</label>
+            <input
+                class="campo__control"
+                id="solar-latitud"
+                type="number"
+                step="0.0001"
+                formControlName="latitud"
+                [attr.aria-invalid]="formularioSistema.controls.latitud.invalid && formularioSistema.controls.latitud.touched"
+            />
+            @if (formularioSistema.controls.latitud.touched && formularioSistema.controls.latitud.invalid) {
+                <span class="campo__error">Entre -90 y 90.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="solar-longitud">Longitud</label>
+            <input
+                class="campo__control"
+                id="solar-longitud"
+                type="number"
+                step="0.0001"
+                formControlName="longitud"
+                [attr.aria-invalid]="formularioSistema.controls.longitud.invalid && formularioSistema.controls.longitud.touched"
+            />
+            @if (formularioSistema.controls.longitud.touched && formularioSistema.controls.longitud.invalid) {
+                <span class="campo__error">Entre -180 y 180.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="solar-municipio">Municipio (id)</label>
+            <input
+                class="campo__control"
+                id="solar-municipio"
+                type="number"
+                min="1"
+                formControlName="municipioId"
+                [attr.aria-invalid]="formularioSistema.controls.municipioId.invalid && formularioSistema.controls.municipioId.touched"
+            />
+            @if (formularioSistema.controls.municipioId.touched && formularioSistema.controls.municipioId.invalid) {
+                <span class="campo__error">El identificador debe ser positivo.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="solar-capacidad">Capacidad instalada (kWp)</label>
+            <input
+                class="campo__control"
+                id="solar-capacidad"
+                type="number"
+                min="0.1"
+                step="0.1"
+                formControlName="capacidadKwp"
+                [attr.aria-invalid]="formularioSistema.controls.capacidadKwp.invalid && formularioSistema.controls.capacidadKwp.touched"
+            />
+            @if (formularioSistema.controls.capacidadKwp.touched && formularioSistema.controls.capacidadKwp.invalid) {
+                <span class="campo__error">Indica una capacidad mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="solar-eficiencia">Eficiencia (0 a 1)</label>
+            <input
+                class="campo__control"
+                id="solar-eficiencia"
+                type="number"
+                min="0.01"
+                max="1"
+                step="0.01"
+                formControlName="eficiencia"
+                [attr.aria-invalid]="formularioSistema.controls.eficiencia.invalid && formularioSistema.controls.eficiencia.touched"
+            />
+            @if (formularioSistema.controls.eficiencia.touched && formularioSistema.controls.eficiencia.invalid) {
+                <span class="campo__error">Entre 0.01 y 1.</span>
+            }
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoProduccion()">
+                {{ cargandoProduccion() ? 'Calculando…' : 'Calcular producción' }}
+            </button>
+            <button
+                class="boton boton--secundario"
+                type="button"
+                [disabled]="cargandoRadiacion()"
+                (click)="consultarRadiacion()"
+            >
+                {{ cargandoRadiacion() ? 'Consultando…' : 'Consultar radiación' }}
+            </button>
+        </div>
+    </form>
+</section>
+
+@if (errorRadiacion(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+}
+
+@if (radiacion(); as radiacion) {
+    <section class="panel" aria-labelledby="titulo-radiacion">
+        <h2 class="panel__titulo" id="titulo-radiacion">Radiación del sitio</h2>
+        <p class="panel__descripcion">{{ radiacion.fuente }}</p>
+
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Radiación diaria</p>
+                <p class="dato__valor">
+                    {{ radiacion.radiacionKwhM2Dia | number: '1.2-2' }} kWh/m²
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Ubicación</p>
+                <p class="dato__valor">
+                    @if (radiacion.latitud !== null && radiacion.longitud !== null) {
+                        {{ radiacion.latitud | number: '1.4-4' }}, {{ radiacion.longitud | number: '1.4-4' }}
+                    } @else {
+                        Municipio {{ radiacion.municipioId }}
+                    }
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Procedencia</p>
+                <p class="dato__valor">
+                    <span [class]="radiacion.esEstimacion ? 'etiqueta etiqueta--alerta' : 'etiqueta etiqueta--ok'">
+                        {{ radiacion.esEstimacion ? 'Estimación' : 'Dato del proveedor' }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </section>
+}
+
+@if (errorProduccion(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+}
+
+@if (produccion(); as produccion) {
+    <section class="panel" aria-labelledby="titulo-produccion">
+        <h2 class="panel__titulo" id="titulo-produccion">Producción estimada</h2>
+        <p class="panel__descripcion">
+            Con una eficiencia del {{ produccion.eficiencia * 100 | number: '1.0-1' }} % y una
+            radiación de {{ produccion.radiacionKwhM2Dia | number: '1.2-2' }} kWh/m² al día.
+            Fuente: {{ produccion.fuenteRadiacion }}.
+        </p>
+
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Capacidad</p>
+                <p class="dato__valor">{{ produccion.capacidadKwp | number: '1.0-2' }} kWp</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Producción mensual</p>
+                <p class="dato__valor">{{ produccion.produccionMensualKwh | number: '1.0-0' }} kWh</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Producción anual</p>
+                <p class="dato__valor">{{ produccion.produccionAnualKwh | number: '1.0-0' }} kWh</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Procedencia</p>
+                <p class="dato__valor">
+                    <span [class]="produccion.esEstimacion ? 'etiqueta etiqueta--alerta' : 'etiqueta etiqueta--ok'">
+                        {{ produccion.esEstimacion ? 'Estimación' : 'Dato del proveedor' }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </section>
+}
+
+<section class="panel" aria-labelledby="titulo-paneles">
+    <h2 class="panel__titulo" id="titulo-paneles">Catálogo de paneles</h2>
+    <p class="panel__descripcion">
+        Filtra el catálogo comercial por fabricante o por potencia mínima.
+    </p>
+
+    <form class="formulario" [formGroup]="formularioPaneles" (ngSubmit)="buscarPaneles()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="paneles-fabricante">Fabricante</label>
+            <input
+                class="campo__control"
+                id="paneles-fabricante"
+                type="search"
+                formControlName="fabricante"
+                placeholder="Todos"
+            />
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="paneles-potencia">Potencia mínima (W)</label>
+            <input
+                class="campo__control"
+                id="paneles-potencia"
+                type="number"
+                min="1"
+                formControlName="potenciaMinima"
+                [attr.aria-invalid]="formularioPaneles.controls.potenciaMinima.invalid && formularioPaneles.controls.potenciaMinima.touched"
+            />
+            @if (formularioPaneles.controls.potenciaMinima.touched && formularioPaneles.controls.potenciaMinima.invalid) {
+                <span class="campo__error">La potencia debe ser mayor que cero.</span>
+            }
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoPaneles()">
+                {{ cargandoPaneles() ? 'Buscando…' : 'Buscar paneles' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorPaneles(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (paneles(); as catalogo) {
+        @if (catalogo.esDemostracion) {
+            <p class="aviso aviso--info" role="status">
+                Datos de demostración{{ catalogo.advertencia ? ': ' + catalogo.advertencia : '.' }}
+            </p>
+        }
+
+        @if (catalogo.paneles.length > 0) {
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <caption>{{ catalogo.paneles.length }} paneles disponibles</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Fabricante</th>
+                            <th scope="col">Modelo</th>
+                            <th scope="col" class="tabla__numero">Potencia W</th>
+                            <th scope="col" class="tabla__numero">Eficiencia %</th>
+                            <th scope="col">Tecnología</th>
+                            <th scope="col" class="tabla__numero">Garantía años</th>
+                            <th scope="col" class="tabla__numero">Medidas m</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (panel of catalogo.paneles; track panel.id) {
+                            <tr>
+                                <th scope="row">{{ panel.fabricante }}</th>
+                                <td>
+                                    {{ panel.modelo }}
+                                    @if (panel.descripcion) {
+                                        <span class="detalle">{{ panel.descripcion }}</span>
+                                    }
+                                </td>
+                                <td class="tabla__numero">{{ panel.potenciaWatts | number: '1.0-0' }}</td>
+                                <td class="tabla__numero">
+                                    {{ panel.eficienciaPorcentaje | number: '1.0-1' }}
+                                </td>
+                                <td>{{ panel.tecnologia }}</td>
+                                <td class="tabla__numero">{{ panel.garantiaAnios }}</td>
+                                <td class="tabla__numero">
+                                    {{ panel.anchoMetros | number: '1.2-2' }} ×
+                                    {{ panel.altoMetros | number: '1.2-2' }}
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        } @else {
+            <p class="aviso aviso--info">No hay paneles que coincidan con el filtro.</p>
+        }
+    }
+</section>

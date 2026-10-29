@@ -1,0 +1,210 @@
+:host {
+    display: block;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+}
+
+.barra {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    height: 100%;
+    padding: 1.35rem 1rem 1.25rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--color-borde, rgba(148, 163, 184, 0.22));
+    background: rgba(7, 27, 41, 0.94);
+}
+
+.boton-cerrar {
+    display: none;
+    place-items: center;
+    position: absolute;
+    top: 0.9rem;
+    inset-inline-end: 0.9rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 1px solid var(--color-borde, rgba(148, 163, 184, 0.22));
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--color-texto, #f1f5f9);
+    cursor: pointer;
+}
+
+.boton-cerrar svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.boton-cerrar:hover {
+    border-color: var(--color-primario, #2dd4bf);
+    color: var(--color-primario, #2dd4bf);
+}
+
+.boton-cerrar:focus-visible {
+    outline: 2px solid var(--color-primario, #2dd4bf);
+    outline-offset: 2px;
+}
+
+.solo-lectores {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding-inline: 0.35rem;
+}
+
+.marca__icono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(140deg, #0f766e, #14b8a6);
+    color: #f8fafc;
+}
+
+.marca__icono svg {
+    width: 1.55rem;
+    height: 1.55rem;
+}
+
+.marca__texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.marca__nombre {
+    color: var(--color-texto, #f1f5f9);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.marca__detalle {
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.78rem;
+}
+
+.navegacion {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 0;
+}
+
+.navegacion__titulo {
+    margin: 0;
+    padding-inline: 0.7rem;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.navegacion__lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.enlace {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 0.65rem;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.94rem;
+    text-decoration: none;
+    transition:
+        background-color 150ms ease,
+        color 150ms ease;
+}
+
+.enlace:hover {
+    background-color: rgba(45, 212, 191, 0.1);
+    color: var(--color-texto, #f1f5f9);
+}
+
+.enlace:focus-visible {
+    outline: 2px solid var(--color-primario, #2dd4bf);
+    outline-offset: 2px;
+}
+
+.enlace--activo {
+    background-color: rgba(45, 212, 191, 0.14);
+    box-shadow: inset 3px 0 0 var(--color-primario, #2dd4bf);
+    color: var(--color-texto, #f1f5f9);
+    font-weight: 600;
+}
+
+.pie {
+    margin: 0;
+    padding-inline: 0.7rem;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 60rem) {
+    :host {
+        position: fixed;
+        inset-block: 0;
+        inset-inline-start: 0;
+        z-index: 40;
+        width: min(19rem, 84vw);
+        height: 100vh;
+        height: 100dvh;
+        transform: translateX(-100%);
+        visibility: hidden;
+        transition:
+            transform 220ms ease,
+            visibility 220ms ease;
+    }
+
+    :host(.gd-barra-lateral--abierta) {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .barra {
+        background: #081d2c;
+        box-shadow: 0 0 2.5rem rgba(0, 0, 0, 0.45);
+    }
+
+    .boton-cerrar {
+        display: grid;
+    }
+
+    .marca {
+        padding-inline-end: 2.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :host,
+    .enlace {
+        transition: none;
+    }
+}

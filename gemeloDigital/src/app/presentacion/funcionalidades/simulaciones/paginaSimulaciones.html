@@ -1,0 +1,415 @@
+@if (mensajeExito(); as mensaje) {
+    <p class="aviso aviso--exito" role="status">{{ mensaje }}</p>
+}
+
+<section class="panel" aria-labelledby="titulo-crear">
+    <h2 class="panel__titulo" id="titulo-crear">Nueva simulación</h2>
+    <p class="panel__descripcion">
+        Registra un escenario con el consumo y la tarifa de CFE. La API calcula
+        paneles necesarios, producción, ahorro, inversión y retorno.
+    </p>
+
+    <form class="formulario" [formGroup]="formularioCrear" (ngSubmit)="crear()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="crear-municipio">Municipio (id)</label>
+            <input
+                class="campo__control"
+                id="crear-municipio"
+                type="number"
+                min="1"
+                formControlName="municipioId"
+                [attr.aria-invalid]="formularioCrear.controls.municipioId.invalid && formularioCrear.controls.municipioId.touched"
+            />
+            @if (formularioCrear.controls.municipioId.touched && formularioCrear.controls.municipioId.invalid) {
+                <span class="campo__error">Indica un municipio válido.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="crear-consumo">Consumo (kWh)</label>
+            <input
+                class="campo__control"
+                id="crear-consumo"
+                type="number"
+                min="1"
+                step="1"
+                formControlName="consumoKwh"
+                [attr.aria-invalid]="formularioCrear.controls.consumoKwh.invalid && formularioCrear.controls.consumoKwh.touched"
+            />
+            @if (formularioCrear.controls.consumoKwh.touched && formularioCrear.controls.consumoKwh.invalid) {
+                <span class="campo__error">El consumo debe ser mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="crear-tarifa">Tarifa CFE (por kWh)</label>
+            <input
+                class="campo__control"
+                id="crear-tarifa"
+                type="number"
+                min="0.01"
+                step="0.01"
+                formControlName="tarifaCfe"
+                [attr.aria-invalid]="formularioCrear.controls.tarifaCfe.invalid && formularioCrear.controls.tarifaCfe.touched"
+            />
+            @if (formularioCrear.controls.tarifaCfe.touched && formularioCrear.controls.tarifaCfe.invalid) {
+                <span class="campo__error">La tarifa debe ser mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="crear-area">Área disponible (m²)</label>
+            <input
+                class="campo__control"
+                id="crear-area"
+                type="number"
+                min="0.01"
+                step="0.5"
+                formControlName="areaDisponibleM2"
+                placeholder="Opcional"
+                [attr.aria-invalid]="formularioCrear.controls.areaDisponibleM2.invalid && formularioCrear.controls.areaDisponibleM2.touched"
+            />
+            @if (formularioCrear.controls.areaDisponibleM2.touched && formularioCrear.controls.areaDisponibleM2.invalid) {
+                <span class="campo__error">El área debe ser mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="crear-tipo-tarifa">Tipo de tarifa</label>
+            <select class="campo__control" id="crear-tipo-tarifa" formControlName="tipoTarifa">
+                @for (tarifa of tiposTarifa; track tarifa) {
+                    <option [value]="tarifa">{{ tarifa }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="campo campo--casilla">
+            <input
+                class="campo__casilla"
+                id="crear-baterias"
+                type="checkbox"
+                formControlName="incluyeBaterias"
+            />
+            <label class="campo__etiqueta" for="crear-baterias">Incluir baterías</label>
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="creando()">
+                {{ creando() ? 'Registrando…' : 'Registrar simulación' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorCrear(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+</section>
+
+<section class="panel" aria-labelledby="titulo-historial">
+    <h2 class="panel__titulo" id="titulo-historial">Historial</h2>
+    <p class="panel__descripcion">Simulaciones registradas, de la más reciente a la más antigua.</p>
+
+    <form class="formulario" [formGroup]="formularioFiltros" (ngSubmit)="cargarHistorial()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="historial-municipio">Municipio (id)</label>
+            <input
+                class="campo__control"
+                id="historial-municipio"
+                type="number"
+                min="1"
+                formControlName="municipioId"
+                placeholder="Todos"
+                [attr.aria-invalid]="formularioFiltros.controls.municipioId.invalid && formularioFiltros.controls.municipioId.touched"
+            />
+            @if (formularioFiltros.controls.municipioId.touched && formularioFiltros.controls.municipioId.invalid) {
+                <span class="campo__error">El identificador debe ser positivo.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="historial-limite">Resultados por página</label>
+            <select class="campo__control" id="historial-limite" formControlName="limite">
+                @for (limite of limites; track limite) {
+                    <option [value]="limite">{{ limite }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoHistorial()">
+                {{ cargandoHistorial() ? 'Consultando…' : 'Aplicar filtros' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorHistorial(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (historial(); as historial) {
+        @if (historial.simulaciones.length > 0) {
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <caption>{{ historial.total }} simulaciones registradas</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Municipio</th>
+                            <th scope="col" class="tabla__numero">Consumo kWh</th>
+                            <th scope="col" class="tabla__numero">Producción anual</th>
+                            <th scope="col" class="tabla__numero">Ahorro</th>
+                            <th scope="col" class="tabla__numero">Retorno años</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col"><span class="solo-lectores">Acciones</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (simulacion of historial.simulaciones; track simulacion.id) {
+                            <tr>
+                                <th scope="row">{{ simulacion.id }}</th>
+                                <td>{{ simulacion.municipioId }}</td>
+                                <td class="tabla__numero">{{ simulacion.consumoKwh | number: '1.0-0' }}</td>
+                                <td class="tabla__numero">{{ simulacion.produccionAnual | number: '1.0-0' }}</td>
+                                <td class="tabla__numero">{{ simulacion.ahorroEstimado | number: '1.0-2' }}</td>
+                                <td class="tabla__numero">
+                                    {{ simulacion.retornoInversionAnios | number: '1.0-1' }}
+                                </td>
+                                <td>{{ simulacion.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                <td>
+                                    <button
+                                        class="boton boton--secundario boton--pequeno"
+                                        type="button"
+                                        (click)="verDetalle(simulacion.id)"
+                                    >
+                                        Ver detalle
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <nav class="paginacion" aria-label="Paginación del historial">
+                <p class="paginacion__resumen">
+                    Página {{ historial.pagina }} de {{ totalPaginas() }}
+                </p>
+                <div class="acciones">
+                    <button
+                        class="boton boton--secundario boton--pequeno"
+                        type="button"
+                        [disabled]="historial.pagina <= 1 || cargandoHistorial()"
+                        (click)="cargarHistorial(historial.pagina - 1)"
+                    >
+                        Anterior
+                    </button>
+                    <button
+                        class="boton boton--secundario boton--pequeno"
+                        type="button"
+                        [disabled]="historial.pagina >= totalPaginas() || cargandoHistorial()"
+                        (click)="cargarHistorial(historial.pagina + 1)"
+                    >
+                        Siguiente
+                    </button>
+                </div>
+            </nav>
+        } @else {
+            <p class="aviso aviso--info">Todavía no hay simulaciones registradas.</p>
+        }
+    }
+</section>
+
+@if (cargandoDetalle()) {
+    <p class="cargando" role="status">Cargando el detalle…</p>
+}
+
+@if (errorDetalle(); as mensaje) {
+    <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+}
+
+@if (seleccionada(); as simulacion) {
+    <section class="panel" aria-labelledby="titulo-detalle">
+        <div class="detalle__cabecera">
+            <div>
+                <h2 class="panel__titulo" id="titulo-detalle">Simulación #{{ simulacion.id }}</h2>
+                <p class="panel__descripcion detalle__meta">
+                    Municipio {{ simulacion.municipioId }} · tarifa {{ simulacion.tipoTarifa }} ·
+                    {{ simulacion.incluyeBaterias ? 'con baterías' : 'sin baterías' }} ·
+                    actualizada el {{ simulacion.fechaActualizacion | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
+            </div>
+            <button
+                class="boton boton--secundario boton--pequeno"
+                type="button"
+                (click)="seleccionada.set(null)"
+            >
+                Cerrar detalle
+            </button>
+        </div>
+
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Paneles necesarios</p>
+                <p class="dato__valor">{{ simulacion.panelesNecesarios }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Producción anual</p>
+                <p class="dato__valor">{{ simulacion.produccionAnual | number: '1.0-0' }} kWh</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Ahorro estimado</p>
+                <p class="dato__valor">{{ simulacion.ahorroEstimado | number: '1.0-2' }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Inversión total</p>
+                <p class="dato__valor">{{ simulacion.costoInversionTotal | number: '1.0-2' }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Retorno</p>
+                <p class="dato__valor">{{ simulacion.retornoInversionAnios | number: '1.0-1' }} años</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Área disponible</p>
+                <p class="dato__valor">
+                    {{ simulacion.areaDisponibleM2 === null ? 'Sin definir' : (simulacion.areaDisponibleM2 | number: '1.0-1') + ' m²' }}
+                </p>
+            </div>
+        </div>
+
+        @if (simulacion.advertencias.length > 0) {
+            <div class="detalle__advertencias">
+                <h3 class="detalle__subtitulo">Advertencias</h3>
+                <ul class="lista-limpia">
+                    @for (advertencia of simulacion.advertencias; track advertencia) {
+                        <li>{{ advertencia }}</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <h3 class="detalle__subtitulo">Recalcular</h3>
+        <form class="formulario" [formGroup]="formularioRecalculo" (ngSubmit)="recalcular()">
+            <div class="campo">
+                <label class="campo__etiqueta" for="recalculo-municipio">Municipio (id)</label>
+                <input
+                    class="campo__control"
+                    id="recalculo-municipio"
+                    type="number"
+                    min="1"
+                    formControlName="municipioId"
+                    [attr.aria-invalid]="formularioRecalculo.controls.municipioId.invalid && formularioRecalculo.controls.municipioId.touched"
+                />
+                @if (formularioRecalculo.controls.municipioId.touched && formularioRecalculo.controls.municipioId.invalid) {
+                    <span class="campo__error">Indica un municipio válido.</span>
+                }
+            </div>
+
+            <div class="campo">
+                <label class="campo__etiqueta" for="recalculo-consumo">Consumo (kWh)</label>
+                <input
+                    class="campo__control"
+                    id="recalculo-consumo"
+                    type="number"
+                    min="1"
+                    formControlName="consumoKwh"
+                    [attr.aria-invalid]="formularioRecalculo.controls.consumoKwh.invalid && formularioRecalculo.controls.consumoKwh.touched"
+                />
+                @if (formularioRecalculo.controls.consumoKwh.touched && formularioRecalculo.controls.consumoKwh.invalid) {
+                    <span class="campo__error">El consumo debe ser mayor que cero.</span>
+                }
+            </div>
+
+            <div class="campo">
+                <label class="campo__etiqueta" for="recalculo-tarifa">Tarifa CFE</label>
+                <input
+                    class="campo__control"
+                    id="recalculo-tarifa"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    formControlName="tarifaCfe"
+                    [attr.aria-invalid]="formularioRecalculo.controls.tarifaCfe.invalid && formularioRecalculo.controls.tarifaCfe.touched"
+                />
+                @if (formularioRecalculo.controls.tarifaCfe.touched && formularioRecalculo.controls.tarifaCfe.invalid) {
+                    <span class="campo__error">La tarifa debe ser mayor que cero.</span>
+                }
+            </div>
+
+            <div class="campo">
+                <label class="campo__etiqueta" for="recalculo-area">Área disponible (m²)</label>
+                <input
+                    class="campo__control"
+                    id="recalculo-area"
+                    type="number"
+                    min="0.01"
+                    step="0.5"
+                    formControlName="areaDisponibleM2"
+                    placeholder="Opcional"
+                />
+            </div>
+
+            <div class="campo">
+                <label class="campo__etiqueta" for="recalculo-tipo-tarifa">Tipo de tarifa</label>
+                <select
+                    class="campo__control"
+                    id="recalculo-tipo-tarifa"
+                    formControlName="tipoTarifa"
+                >
+                    @for (tarifa of tiposTarifa; track tarifa) {
+                        <option [value]="tarifa">{{ tarifa }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="campo campo--casilla">
+                <input
+                    class="campo__casilla"
+                    id="recalculo-baterias"
+                    type="checkbox"
+                    formControlName="incluyeBaterias"
+                />
+                <label class="campo__etiqueta" for="recalculo-baterias">Incluir baterías</label>
+            </div>
+
+            <div class="acciones">
+                <button class="boton" type="submit" [disabled]="recalculando() || eliminando()">
+                    {{ recalculando() ? 'Recalculando…' : 'Recalcular' }}
+                </button>
+            </div>
+        </form>
+
+        <div class="detalle__peligro">
+            @if (!confirmandoEliminar()) {
+                <button
+                    class="boton boton--peligro boton--pequeno"
+                    type="button"
+                    (click)="confirmandoEliminar.set(true)"
+                >
+                    Eliminar simulación
+                </button>
+            } @else {
+                <p class="detalle__confirmacion">
+                    ¿Eliminar la simulación #{{ simulacion.id }}? Esta acción no se puede deshacer.
+                </p>
+                <div class="acciones">
+                    <button
+                        class="boton boton--peligro boton--pequeno"
+                        type="button"
+                        [disabled]="eliminando()"
+                        (click)="eliminar()"
+                    >
+                        {{ eliminando() ? 'Eliminando…' : 'Sí, eliminar' }}
+                    </button>
+                    <button
+                        class="boton boton--secundario boton--pequeno"
+                        type="button"
+                        [disabled]="eliminando()"
+                        (click)="confirmandoEliminar.set(false)"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            }
+        </div>
+    </section>
+}

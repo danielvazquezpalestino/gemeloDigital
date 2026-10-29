@@ -1,4 +1,5 @@
 import { sesion } from '../../dominio/entidades/sesion.entidad';
+import { usuario } from '../../dominio/entidades/usuario.entidad';
 
 /**
  * Puerto de acceso a la API de autenticación.
@@ -8,5 +9,7 @@ import { sesion } from '../../dominio/entidades/sesion.entidad';
  */
 export abstract class repositorioAutenticacion
 {
+    abstract registrar(nombre: string, correo: string, contrasenia: string): Promise<usuario>;
+
     abstract iniciarSesion(correo: string, contrasenia: string): Promise<sesion>;
 }

@@ -1,0 +1,19 @@
+<a class="salto" href="#contenido-principal">Saltar al contenido</a>
+
+<gd-barra-lateral [abierto]="menuAbierto()" (cerrar)="cerrarMenu()" />
+
+@if (menuAbierto()) {
+    <div class="velo" aria-hidden="true" (click)="cerrarMenu()"></div>
+}
+
+<div class="area">
+    <gd-encabezado
+        [titulo]="tituloPagina()"
+        [menuAbierto]="menuAbierto()"
+        (abrirMenu)="abrirMenu()"
+    />
+
+    <main id="contenido-principal" class="contenido" tabindex="-1">
+        <router-outlet />
+    </main>
+</div>

@@ -1,0 +1,39 @@
+@use '../../compartido/estilos/formularios';
+
+:host {
+    display: block;
+}
+
+.detalle {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.78rem;
+}
+
+.bloques {
+    margin: 0;
+    padding-inline-start: 1rem;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.supuestos {
+    margin-top: 1rem;
+}
+
+.supuestos__titulo {
+    margin: 0 0 0.35rem;
+    font-size: 0.85rem;
+}
+
+.panel__nota {
+    margin: 0.75rem 0 0;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.8rem;
+}
+
+.advertencias-riesgo {
+    margin-top: 0.75rem;
+}

@@ -1,0 +1,309 @@
+<section class="panel" aria-labelledby="titulo-catalogo">
+    <h2 class="panel__titulo" id="titulo-catalogo">Catálogo de incentivos</h2>
+    <p class="panel__descripcion">
+        Programas de apoyo a la generación distribuida. Puedes filtrar por tipo de
+        beneficiario, municipio y estado de vigencia.
+    </p>
+
+    <form class="formulario" [formGroup]="formularioConsulta" (ngSubmit)="buscar()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="incentivos-beneficiario">Beneficiario</label>
+            <select class="campo__control" id="incentivos-beneficiario" formControlName="tipoBeneficiario">
+                <option value="">Todos</option>
+                @for (tipo of tiposBeneficiario; track tipo) {
+                    <option [value]="tipo">{{ tipo === 'home' ? 'Hogar' : 'Negocio' }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="incentivos-municipio">Municipio</label>
+            <input
+                class="campo__control"
+                id="incentivos-municipio"
+                type="search"
+                formControlName="municipio"
+                placeholder="Todos"
+            />
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="incentivos-estado">Estado</label>
+            <select class="campo__control" id="incentivos-estado" formControlName="estado">
+                <option value="">Todos</option>
+                @for (estado of estados; track estado) {
+                    <option [value]="estado">{{ estado }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="incentivos-limite">Resultados por página</label>
+            <select class="campo__control" id="incentivos-limite" formControlName="limite">
+                @for (limite of limites; track limite) {
+                    <option [value]="limite">{{ limite }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoConsulta()">
+                {{ cargandoConsulta() ? 'Consultando…' : 'Buscar incentivos' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorConsulta(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (consulta(); as consulta) {
+        @if (consulta.incentivos.length > 0) {
+            <ul class="incentivos">
+                @for (incentivo of consulta.incentivos; track incentivo.id) {
+                    <li class="incentivo">
+                        <div class="incentivo__cabecera">
+                            <div>
+                                <p class="incentivo__programa">{{ incentivo.programa }}</p>
+                                <h3 class="incentivo__nombre">{{ incentivo.nombre }}</h3>
+                            </div>
+                            <span
+                                [class]="incentivo.verificado ? 'etiqueta etiqueta--ok' : 'etiqueta etiqueta--alerta'"
+                            >
+                                {{ incentivo.verificado ? 'Verificado' : 'Por verificar' }}
+                            </span>
+                        </div>
+
+                        <p class="incentivo__descripcion">{{ incentivo.descripcion }}</p>
+
+                        <dl class="incentivo__datos">
+                            <div>
+                                <dt>Beneficiarios</dt>
+                                <dd>{{ incentivo.beneficiarios.join(', ') }}</dd>
+                            </div>
+                            <div>
+                                <dt>Vigencia</dt>
+                                <dd>
+                                    @if (incentivo.vigenciaDesde || incentivo.vigenciaHasta) {
+                                        {{ incentivo.vigenciaDesde ? (incentivo.vigenciaDesde | date: 'dd/MM/yyyy') : 'sin inicio' }}
+                                        –
+                                        {{ incentivo.vigenciaHasta ? (incentivo.vigenciaHasta | date: 'dd/MM/yyyy') : 'sin fin' }}
+                                    } @else {
+                                        Sin vigencia registrada
+                                    }
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Organismo</dt>
+                                <dd>{{ incentivo.organismoResponsable ?? 'No indicado' }}</dd>
+                            </div>
+                            <div>
+                                <dt>Municipio</dt>
+                                <dd>{{ incentivo.municipioId === null ? 'Todos' : incentivo.municipioId }}</dd>
+                            </div>
+                        </dl>
+
+                        @if (incentivo.beneficios.length > 0) {
+                            <ul class="beneficios">
+                                @for (beneficio of incentivo.beneficios; track beneficio.tipo) {
+                                    <li>
+                                        <span class="beneficios__tipo">{{ beneficio.tipo }}</span>
+                                        <span class="beneficios__valor">{{ textoBeneficio(beneficio) }}</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                        @if (incentivo.requisitos.length > 0) {
+                            <details class="requisitos">
+                                <summary>Requisitos ({{ incentivo.requisitos.length }})</summary>
+                                <ul class="lista-limpia">
+                                    @for (requisito of incentivo.requisitos; track requisito.campo) {
+                                        <li>
+                                            {{ requisito.descripcion }}
+                                            @if (requisito.requerido) {
+                                                <span class="etiqueta">Obligatorio</span>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            </details>
+                        }
+
+                        @if (incentivo.fuenteOficial) {
+                            <p class="incentivo__fuente">Fuente: {{ incentivo.fuenteOficial }}</p>
+                        }
+                    </li>
+                }
+            </ul>
+
+            <nav class="paginacion" aria-label="Paginación del catálogo">
+                <p class="paginacion__resumen">
+                    {{ consulta.total }} incentivos · página {{ consulta.pagina }} de
+                    {{ totalPaginas() }}
+                </p>
+                <div class="acciones">
+                    <button
+                        class="boton boton--secundario boton--pequeno"
+                        type="button"
+                        [disabled]="consulta.pagina <= 1 || cargandoConsulta()"
+                        (click)="buscar(consulta.pagina - 1)"
+                    >
+                        Anterior
+                    </button>
+                    <button
+                        class="boton boton--secundario boton--pequeno"
+                        type="button"
+                        [disabled]="consulta.pagina >= totalPaginas() || cargandoConsulta()"
+                        (click)="buscar(consulta.pagina + 1)"
+                    >
+                        Siguiente
+                    </button>
+                </div>
+            </nav>
+        } @else {
+            <p class="aviso aviso--info">No hay incentivos que coincidan con los filtros.</p>
+        }
+    }
+</section>
+
+<section class="panel" aria-labelledby="titulo-elegibilidad">
+    <h2 class="panel__titulo" id="titulo-elegibilidad">Evaluar elegibilidad</h2>
+    <p class="panel__descripcion">
+        Describe el proyecto y la API indicará qué programas podrían aplicar, qué
+        requisitos se cumplen y cuáles faltan.
+    </p>
+
+    <form
+        class="formulario"
+        [formGroup]="formularioElegibilidad"
+        (ngSubmit)="evaluar()"
+    >
+        <div class="campo">
+            <label class="campo__etiqueta" for="elegibilidad-beneficiario">Beneficiario</label>
+            <select
+                class="campo__control"
+                id="elegibilidad-beneficiario"
+                formControlName="tipoBeneficiario"
+            >
+                @for (tipo of tiposBeneficiario; track tipo) {
+                    <option [value]="tipo">{{ tipo === 'home' ? 'Hogar' : 'Negocio' }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="elegibilidad-municipio">Municipio</label>
+            <input
+                class="campo__control"
+                id="elegibilidad-municipio"
+                type="text"
+                formControlName="municipio"
+                [attr.aria-invalid]="formularioElegibilidad.controls.municipio.invalid && formularioElegibilidad.controls.municipio.touched"
+            />
+            @if (formularioElegibilidad.controls.municipio.touched && formularioElegibilidad.controls.municipio.invalid) {
+                <span class="campo__error">Indica el municipio.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="elegibilidad-capacidad">Capacidad (kW)</label>
+            <input
+                class="campo__control"
+                id="elegibilidad-capacidad"
+                type="number"
+                min="0.01"
+                max="100"
+                step="0.1"
+                formControlName="capacidadSistemaKw"
+                [attr.aria-invalid]="formularioElegibilidad.controls.capacidadSistemaKw.invalid && formularioElegibilidad.controls.capacidadSistemaKw.touched"
+            />
+            @if (formularioElegibilidad.controls.capacidadSistemaKw.touched && formularioElegibilidad.controls.capacidadSistemaKw.invalid) {
+                <span class="campo__error">Entre 0.01 y 100 kW.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="elegibilidad-instalacion">Tipo de instalación</label>
+            <input
+                class="campo__control"
+                id="elegibilidad-instalacion"
+                type="text"
+                formControlName="tipoInstalacion"
+                placeholder="Techo, terreno…"
+            />
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoEvaluacion()">
+                {{ cargandoEvaluacion() ? 'Evaluando…' : 'Evaluar elegibilidad' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorEvaluacion(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (evaluacion(); as evaluacion) {
+        <p class="resumen-evaluacion">
+            {{ evaluacion.evaluaciones.length }} programas evaluados para
+            {{ evaluacion.tipoBeneficiario === 'home' ? 'un hogar' : 'un negocio' }} en
+            {{ evaluacion.municipio }} · {{ evaluacion.fechaEvaluacion | date: 'dd/MM/yyyy HH:mm' }}
+        </p>
+
+        @if (evaluacion.evaluaciones.length > 0) {
+            <ul class="evaluaciones">
+                @for (evaluacionIncentivo of evaluacion.evaluaciones; track evaluacionIncentivo.incentivoEvaluado.id) {
+                    <li class="evaluacion">
+                        <div class="evaluacion__cabecera">
+                            <h3 class="evaluacion__nombre">
+                                {{ evaluacionIncentivo.incentivoEvaluado.nombre }}
+                            </h3>
+                            <span [class]="claseEstado(evaluacionIncentivo.estado)">
+                                {{ etiquetaEstado(evaluacionIncentivo.estado) }}
+                            </span>
+                        </div>
+
+                        <p class="evaluacion__explicacion">{{ evaluacionIncentivo.explicacion }}</p>
+
+                        @if (evaluacionIncentivo.requisitosCumplidos.length > 0) {
+                            <div class="evaluacion__bloque">
+                                <h4 class="evaluacion__subtitulo">Requisitos cumplidos</h4>
+                                <ul class="lista-limpia">
+                                    @for (requisito of evaluacionIncentivo.requisitosCumplidos; track requisito.campo) {
+                                        <li>{{ requisito.descripcion }}</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        @if (evaluacionIncentivo.requisitosPendientes.length > 0) {
+                            <div class="evaluacion__bloque">
+                                <h4 class="evaluacion__subtitulo">Requisitos pendientes</h4>
+                                <ul class="lista-limpia">
+                                    @for (requisito of evaluacionIncentivo.requisitosPendientes; track requisito.campo) {
+                                        <li>{{ requisito.descripcion }}</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        @if (evaluacionIncentivo.datosFaltantes.length > 0) {
+                            <div class="evaluacion__bloque">
+                                <h4 class="evaluacion__subtitulo">Datos faltantes</h4>
+                                <ul class="lista-limpia">
+                                    @for (dato of evaluacionIncentivo.datosFaltantes; track dato) {
+                                        <li>{{ dato }}</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+        } @else {
+            <p class="aviso aviso--info">No hay programas registrados para evaluar.</p>
+        }
+    }
+</section>

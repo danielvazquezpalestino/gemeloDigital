@@ -1,0 +1,17 @@
+@use '../../compartido/estilos/formularios';
+
+:host {
+    display: block;
+}
+
+.detalle {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--color-texto-suave, #a8b8c7);
+    font-size: 0.78rem;
+}
+
+.aviso + .panel,
+.panel + .aviso {
+    margin-top: 1.1rem;
+}

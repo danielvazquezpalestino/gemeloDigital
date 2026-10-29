@@ -1,0 +1,283 @@
+<section class="panel" aria-labelledby="titulo-catalogo">
+    <h2 class="panel__titulo" id="titulo-catalogo">Catálogo de tarifas</h2>
+    <p class="panel__descripcion">
+        Tarifas eléctricas que reconoce la API, con sus bloques de consumo.
+    </p>
+
+    @if (errorCatalogo(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (cargandoCatalogo()) {
+        <p class="cargando" role="status">Cargando tarifas…</p>
+    }
+
+    @if (catalogo(); as catalogo) {
+        @if (catalogo.esDemostracion) {
+            <p class="aviso aviso--info" role="status">
+                Datos de demostración{{ catalogo.advertencia ? ': ' + catalogo.advertencia : '.' }}
+            </p>
+        }
+
+        @if (catalogo.tarifas.length > 0) {
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <caption>{{ catalogo.tarifas.length }} tarifas disponibles</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Código</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Bloques de consumo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (tarifa of catalogo.tarifas; track tarifa.codigo) {
+                            <tr>
+                                <th scope="row">{{ tarifa.codigo }}</th>
+                                <td>
+                                    {{ tarifa.nombre }}
+                                    <span class="detalle">{{ tarifa.descripcion }}</span>
+                                </td>
+                                <td>{{ tarifa.tipoUsuario }}</td>
+                                <td>
+                                    <ul class="bloques">
+                                        @for (bloque of tarifa.bloques; track bloque.precioKwh) {
+                                            <li>
+                                                @if (bloque.hastaKwh === null) {
+                                                    Sin límite
+                                                } @else {
+                                                    Hasta {{ bloque.hastaKwh | number: '1.0-0' }} kWh
+                                                }
+                                                · {{ bloque.precioKwh | number: '1.2-4' }} por kWh
+                                            </li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        } @else {
+            <p class="aviso aviso--info">La API no devolvió tarifas.</p>
+        }
+    }
+</section>
+
+<section class="panel" aria-labelledby="titulo-factura">
+    <h2 class="panel__titulo" id="titulo-factura">Estimar factura</h2>
+    <p class="panel__descripcion">
+        Calcula el importe de un consumo con una tarifa y un periodo de facturación.
+    </p>
+
+    <form class="formulario" [formGroup]="formularioFactura" (ngSubmit)="estimarFactura()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="factura-tarifa">Tarifa</label>
+            <select class="campo__control" id="factura-tarifa" formControlName="tipoTarifa">
+                @for (tarifa of tiposTarifa; track tarifa) {
+                    <option [value]="tarifa">{{ tarifa }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="factura-consumo">Consumo (kWh)</label>
+            <input
+                class="campo__control"
+                id="factura-consumo"
+                type="number"
+                min="1"
+                step="1"
+                formControlName="consumoKwh"
+                [attr.aria-invalid]="formularioFactura.controls.consumoKwh.invalid && formularioFactura.controls.consumoKwh.touched"
+            />
+            @if (formularioFactura.controls.consumoKwh.touched && formularioFactura.controls.consumoKwh.invalid) {
+                <span class="campo__error">Indica un consumo mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="factura-periodo">Periodo</label>
+            <select class="campo__control" id="factura-periodo" formControlName="periodo">
+                @for (periodo of periodos; track periodo) {
+                    <option [value]="periodo">{{ periodo }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoFactura()">
+                {{ cargandoFactura() ? 'Calculando…' : 'Estimar factura' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorFactura(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (factura(); as factura) {
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Tarifa</p>
+                <p class="dato__valor">{{ factura.tarifaCodigo }}</p>
+                <p class="dato__detalle">{{ factura.tarifaNombre }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Consumo</p>
+                <p class="dato__valor">{{ factura.consumoKwh | number: '1.0-2' }} kWh</p>
+                <p class="dato__detalle">Periodo {{ factura.periodo | lowercase }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Total estimado</p>
+                <p class="dato__valor">
+                    {{ factura.totalEstimado | number: '1.2-2' }} {{ factura.moneda }}
+                </p>
+                @if (factura.esDemostracion) {
+                    <p class="dato__detalle">Cálculo de demostración</p>
+                }
+            </div>
+        </div>
+
+        <div class="tabla-envoltura">
+            <table class="tabla">
+                <caption>Desglose del cálculo</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Concepto</th>
+                        <th scope="col" class="tabla__numero">Cantidad kWh</th>
+                        <th scope="col" class="tabla__numero">Precio kWh</th>
+                        <th scope="col" class="tabla__numero">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (linea of factura.desglose; track linea.concepto) {
+                        <tr>
+                            <th scope="row">{{ linea.concepto }}</th>
+                            <td class="tabla__numero">{{ linea.cantidadKwh | number: '1.0-2' }}</td>
+                            <td class="tabla__numero">{{ linea.precioKwh | number: '1.2-4' }}</td>
+                            <td class="tabla__numero">{{ linea.subtotal | number: '1.2-2' }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (factura.supuestos.length > 0) {
+            <div class="supuestos">
+                <h3 class="supuestos__titulo">Supuestos del cálculo</h3>
+                <ul class="lista-limpia">
+                    @for (supuesto of factura.supuestos; track supuesto) {
+                        <li>{{ supuesto }}</li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</section>
+
+<section class="panel" aria-labelledby="titulo-riesgo">
+    <h2 class="panel__titulo" id="titulo-riesgo">Riesgo de tarifa DAC</h2>
+    <p class="panel__descripcion">
+        Estima si el consumo promedio mensual podría rebasar el umbral que lleva a
+        la tarifa de alto consumo.
+    </p>
+
+    <form class="formulario" [formGroup]="formularioRiesgo" (ngSubmit)="evaluarRiesgo()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="riesgo-tarifa">Tarifa actual</label>
+            <select class="campo__control" id="riesgo-tarifa" formControlName="tipoTarifa">
+                @for (tarifa of tiposTarifa; track tarifa) {
+                    <option [value]="tarifa">{{ tarifa }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="riesgo-consumo">Consumo promedio mensual (kWh)</label>
+            <input
+                class="campo__control"
+                id="riesgo-consumo"
+                type="number"
+                min="1"
+                formControlName="consumoPromedio"
+                [attr.aria-invalid]="formularioRiesgo.controls.consumoPromedio.invalid && formularioRiesgo.controls.consumoPromedio.touched"
+            />
+            @if (formularioRiesgo.controls.consumoPromedio.touched && formularioRiesgo.controls.consumoPromedio.invalid) {
+                <span class="campo__error">Indica un consumo mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="riesgo-meses">Meses históricos</label>
+            <input
+                class="campo__control"
+                id="riesgo-meses"
+                type="number"
+                min="1"
+                max="120"
+                formControlName="meses"
+                [attr.aria-invalid]="formularioRiesgo.controls.meses.invalid && formularioRiesgo.controls.meses.touched"
+            />
+            @if (formularioRiesgo.controls.meses.touched && formularioRiesgo.controls.meses.invalid) {
+                <span class="campo__error">Entre 1 y 120 meses.</span>
+            }
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargandoRiesgo()">
+                {{ cargandoRiesgo() ? 'Evaluando…' : 'Evaluar riesgo' }}
+            </button>
+        </div>
+    </form>
+
+    @if (errorRiesgo(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (riesgo(); as riesgo) {
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Nivel de riesgo</p>
+                <p class="dato__valor">
+                    <span [class]="claseNivel(riesgo.nivelRiesgo)">{{ riesgo.nivelRiesgo }}</span>
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Consumo evaluado</p>
+                <p class="dato__valor">
+                    {{ riesgo.consumoPromedioMensualKwh | number: '1.0-0' }} kWh
+                </p>
+                <p class="dato__detalle">{{ riesgo.mesesHistoricos }} meses</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Umbral mensual</p>
+                <p class="dato__valor">
+                    {{ riesgo.umbralMensualKwh === null ? '—' : (riesgo.umbralMensualKwh | number: '1.0-0') + ' kWh' }}
+                </p>
+                @if (riesgo.indiceSobreUmbral !== null) {
+                    <p class="dato__detalle">
+                        Índice sobre el umbral: {{ riesgo.indiceSobreUmbral | number: '1.2-2' }}
+                    </p>
+                }
+            </div>
+        </div>
+
+        <p class="aviso aviso--info">{{ riesgo.motivo }}</p>
+
+        @if (!riesgo.determinacionOficial) {
+            <p class="panel__nota">
+                Este resultado es orientativo: la determinación oficial corresponde a CFE.
+            </p>
+        }
+
+        @if (riesgo.advertencias.length > 0) {
+            <ul class="lista-limpia advertencias-riesgo">
+                @for (advertencia of riesgo.advertencias; track advertencia) {
+                    <li>{{ advertencia }}</li>
+                }
+            </ul>
+        }
+    }
+</section>

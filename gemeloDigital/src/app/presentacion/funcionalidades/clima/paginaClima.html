@@ -1,0 +1,135 @@
+<section class="panel" aria-labelledby="titulo-pronostico">
+    <h2 class="panel__titulo" id="titulo-pronostico">Pronóstico meteorológico</h2>
+    <p class="panel__descripcion">
+        Indica una coordenada y cuántos días quieres consultar (1 a 16). Los datos
+        provienen del proveedor meteorológico configurado en la API.
+    </p>
+
+    <form class="formulario" [formGroup]="formulario" (ngSubmit)="consultar()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="clima-latitud">Latitud</label>
+            <input
+                class="campo__control"
+                id="clima-latitud"
+                type="number"
+                step="0.0001"
+                formControlName="latitud"
+                [attr.aria-invalid]="formulario.controls.latitud.invalid && formulario.controls.latitud.touched"
+            />
+            @if (formulario.controls.latitud.touched && formulario.controls.latitud.invalid) {
+                <span class="campo__error">Entre -90 y 90.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="clima-longitud">Longitud</label>
+            <input
+                class="campo__control"
+                id="clima-longitud"
+                type="number"
+                step="0.0001"
+                formControlName="longitud"
+                [attr.aria-invalid]="formulario.controls.longitud.invalid && formulario.controls.longitud.touched"
+            />
+            @if (formulario.controls.longitud.touched && formulario.controls.longitud.invalid) {
+                <span class="campo__error">Entre -180 y 180.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="clima-dias">Días</label>
+            <input
+                class="campo__control"
+                id="clima-dias"
+                type="number"
+                min="1"
+                max="16"
+                formControlName="dias"
+                [attr.aria-invalid]="formulario.controls.dias.invalid && formulario.controls.dias.touched"
+            />
+            @if (formulario.controls.dias.touched && formulario.controls.dias.invalid) {
+                <span class="campo__error">Entre 1 y 16 días.</span>
+            }
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargando()">
+                {{ cargando() ? 'Consultando…' : 'Consultar pronóstico' }}
+            </button>
+        </div>
+    </form>
+
+    @if (mensajeError(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (cargando()) {
+        <p class="cargando" role="status">Obteniendo el pronóstico…</p>
+    }
+</section>
+
+@if (pronostico(); as datos) {
+    <section class="panel" aria-labelledby="titulo-registros">
+        <h2 class="panel__titulo" id="titulo-registros">Detalle del pronóstico</h2>
+        <p class="panel__descripcion">
+            {{ datos.proveedor }} · {{ datos.dias }} días · zona {{ datos.zonaHoraria }}
+        </p>
+
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">Latitud</p>
+                <p class="dato__valor">{{ datos.latitud | number: '1.4-4' }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Longitud</p>
+                <p class="dato__valor">{{ datos.longitud | number: '1.4-4' }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Consultado</p>
+                <p class="dato__valor">{{ datos.fechaConsulta | date: 'dd/MM/yyyy HH:mm' }}</p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Registros</p>
+                <p class="dato__valor">{{ datos.registros.length }}</p>
+            </div>
+        </div>
+
+        @if (datos.registros.length > 0) {
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <caption>Valores diarios reportados por el proveedor</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col" class="tabla__numero">Temperatura °C</th>
+                            <th scope="col" class="tabla__numero">Nubosidad %</th>
+                            <th scope="col" class="tabla__numero">Precipitación mm</th>
+                            <th scope="col" class="tabla__numero">Radiación kWh/m²</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (registro of datos.registros; track registro.fecha) {
+                            <tr>
+                                <th scope="row">{{ registro.fecha | date: 'EEE dd/MM' }}</th>
+                                <td class="tabla__numero">
+                                    {{ registro.temperatura === null ? '—' : (registro.temperatura | number: '1.1-1') }}
+                                </td>
+                                <td class="tabla__numero">
+                                    {{ registro.nubosidad === null ? '—' : (registro.nubosidad | number: '1.0-0') }}
+                                </td>
+                                <td class="tabla__numero">
+                                    {{ registro.precipitacion === null ? '—' : (registro.precipitacion | number: '1.1-1') }}
+                                </td>
+                                <td class="tabla__numero">
+                                    {{ registro.radiacionSolar === null ? '—' : (registro.radiacionSolar | number: '1.2-2') }}
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        } @else {
+            <p class="aviso aviso--info">El proveedor no devolvió registros para esta ubicación.</p>
+        }
+    </section>
+}

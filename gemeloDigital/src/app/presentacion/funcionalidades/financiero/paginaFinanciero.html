@@ -1,0 +1,207 @@
+<section class="panel" aria-labelledby="titulo-estimacion">
+    <h2 class="panel__titulo" id="titulo-estimacion">Estimación financiera</h2>
+    <p class="panel__descripcion">
+        Calcula el valor presente neto, la tasa interna de retorno y el periodo de
+        recuperación con los datos del proyecto. La tasa de descuento se expresa en
+        tanto por uno (0.08 equivale a 8 %).
+    </p>
+
+    <form class="formulario" [formGroup]="formulario" (ngSubmit)="estimar()">
+        <div class="campo">
+            <label class="campo__etiqueta" for="financiero-inversion">Inversión inicial</label>
+            <input
+                class="campo__control"
+                id="financiero-inversion"
+                type="number"
+                min="1"
+                step="1000"
+                formControlName="inversionInicial"
+                [attr.aria-invalid]="formulario.controls.inversionInicial.invalid && formulario.controls.inversionInicial.touched"
+            />
+            @if (formulario.controls.inversionInicial.touched && formulario.controls.inversionInicial.invalid) {
+                <span class="campo__error">Indica una inversión mayor que cero.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="financiero-ahorro">Ahorro anual</label>
+            <input
+                class="campo__control"
+                id="financiero-ahorro"
+                type="number"
+                min="0"
+                step="500"
+                formControlName="ahorroAnual"
+                [attr.aria-invalid]="formulario.controls.ahorroAnual.invalid && formulario.controls.ahorroAnual.touched"
+            />
+            @if (formulario.controls.ahorroAnual.touched && formulario.controls.ahorroAnual.invalid) {
+                <span class="campo__error">El ahorro no puede ser negativo.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="financiero-mantenimiento">Mantenimiento anual</label>
+            <input
+                class="campo__control"
+                id="financiero-mantenimiento"
+                type="number"
+                min="0"
+                step="100"
+                formControlName="mantenimientoAnual"
+                [attr.aria-invalid]="formulario.controls.mantenimientoAnual.invalid && formulario.controls.mantenimientoAnual.touched"
+            />
+            @if (formulario.controls.mantenimientoAnual.touched && formulario.controls.mantenimientoAnual.invalid) {
+                <span class="campo__error">El mantenimiento no puede ser negativo.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="financiero-horizonte">Horizonte (años)</label>
+            <input
+                class="campo__control"
+                id="financiero-horizonte"
+                type="number"
+                min="1"
+                max="50"
+                formControlName="horizonteAnios"
+                [attr.aria-invalid]="formulario.controls.horizonteAnios.invalid && formulario.controls.horizonteAnios.touched"
+            />
+            @if (formulario.controls.horizonteAnios.touched && formulario.controls.horizonteAnios.invalid) {
+                <span class="campo__error">Entre 1 y 50 años.</span>
+            }
+        </div>
+
+        <div class="campo">
+            <label class="campo__etiqueta" for="financiero-tasa">Tasa de descuento</label>
+            <input
+                class="campo__control"
+                id="financiero-tasa"
+                type="number"
+                min="0"
+                max="1"
+                step="0.01"
+                formControlName="tasaDescuento"
+                [attr.aria-invalid]="formulario.controls.tasaDescuento.invalid && formulario.controls.tasaDescuento.touched"
+            />
+            @if (formulario.controls.tasaDescuento.touched && formulario.controls.tasaDescuento.invalid) {
+                <span class="campo__error">Entre 0 y 1.</span>
+            }
+        </div>
+
+        <div class="acciones">
+            <button class="boton" type="submit" [disabled]="cargando()">
+                {{ cargando() ? 'Calculando…' : 'Estimar rentabilidad' }}
+            </button>
+        </div>
+    </form>
+
+    @if (mensajeError(); as mensaje) {
+        <p class="aviso aviso--error" role="alert">{{ mensaje }}</p>
+    }
+
+    @if (cargando()) {
+        <p class="cargando" role="status">Calculando los flujos de caja…</p>
+    }
+</section>
+
+@if (resultado(); as resultado) {
+    <section class="panel" aria-labelledby="titulo-resultado">
+        <h2 class="panel__titulo" id="titulo-resultado">Resultado de la estimación</h2>
+        <p class="panel__descripcion">
+            {{ resultado.horizonteAnios }} años · tasa de descuento
+            {{ resultado.tasaDescuento * 100 | number: '1.0-2' }} % ·
+            {{ resultado.convencionFlujos }}
+        </p>
+
+        <div class="rejilla">
+            <div class="dato">
+                <p class="dato__etiqueta">VPN</p>
+                <p class="dato__valor">
+                    <span [class]="resultado.vpn >= 0 ? 'positivo' : 'negativo'">
+                        {{ resultado.vpn | number: '1.0-2' }} {{ resultado.moneda }}
+                    </span>
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">TIR</p>
+                <p class="dato__valor">
+                    {{ resultado.tirPorcentaje === null ? 'No determinable' : (resultado.tirPorcentaje | number: '1.0-2') + ' %' }}
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">ROI</p>
+                <p class="dato__valor">
+                    <span [class]="resultado.roiPorcentaje >= 0 ? 'positivo' : 'negativo'">
+                        {{ resultado.roiPorcentaje | number: '1.0-2' }} %
+                    </span>
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Recuperación</p>
+                <p class="dato__valor">
+                    {{ resultado.recuperacionAnios === null ? 'No recuperable' : (resultado.recuperacionAnios | number: '1.0-1') + ' años' }}
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Flujo neto anual</p>
+                <p class="dato__valor">
+                    {{ resultado.flujoNetoAnual | number: '1.0-2' }} {{ resultado.moneda }}
+                </p>
+                <p class="dato__detalle">
+                    {{ resultado.ahorroAnual | number: '1.0-2' }} de ahorro −
+                    {{ resultado.mantenimientoAnual | number: '1.0-2' }} de mantenimiento
+                </p>
+            </div>
+            <div class="dato">
+                <p class="dato__etiqueta">Inversión</p>
+                <p class="dato__valor">
+                    {{ resultado.inversionInicial | number: '1.0-2' }} {{ resultado.moneda }}
+                </p>
+                <p class="dato__detalle">
+                    {{ resultado.incluyeIva ? 'Incluye IVA' : 'Sin IVA' }}
+                </p>
+            </div>
+        </div>
+
+        @if (resultado.flujosAnuales.length > 0) {
+            <div class="tabla-envoltura">
+                <table class="tabla">
+                    <caption>Flujos de caja por año</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Año</th>
+                            <th scope="col" class="tabla__numero">Flujo neto</th>
+                            <th scope="col" class="tabla__numero">Flujo descontado</th>
+                            <th scope="col" class="tabla__numero">Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (flujo of resultado.flujosAnuales; track flujo.anio) {
+                            <tr>
+                                <th scope="row">{{ flujo.anio }}</th>
+                                <td class="tabla__numero">{{ flujo.flujoNeto | number: '1.0-2' }}</td>
+                                <td class="tabla__numero">{{ flujo.flujoDescontado | number: '1.0-2' }}</td>
+                                <td class="tabla__numero">
+                                    <span [class]="flujo.acumulado >= 0 ? 'positivo' : 'negativo'">
+                                        {{ flujo.acumulado | number: '1.0-2' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (resultado.advertencias.length > 0) {
+            <div class="advertencias">
+                <h3 class="advertencias__titulo">Advertencias</h3>
+                <ul class="lista-limpia">
+                    @for (advertencia of resultado.advertencias; track advertencia) {
+                        <li>{{ advertencia }}</li>
+                    }
+                </ul>
+            </div>
+        }
+    </section>
+}

@@ -1,6 +1,6 @@
 import { respuestaSesionDto } from '../dto/respuestaSesion.dto';
 import { sesion } from '../../dominio/entidades/sesion.entidad';
-import { usuario } from '../../dominio/entidades/usuario.entidad';
+import { usuarioMapeador } from './usuario.mapeador';
 
 /**
  * Traduce el DTO de la API a entidades de dominio.
@@ -10,12 +10,7 @@ export class sesionMapeador
     static aDominio(dto: respuestaSesionDto): sesion
     {
         return new sesion(
-            new usuario(
-                dto.usuario.id,
-                dto.usuario.nombre,
-                dto.usuario.correo,
-                dto.usuario.roles,
-            ),
+            usuarioMapeador.aDominio(dto.usuario),
             dto.token,
             dto.expiraEnSegundos,
         );
